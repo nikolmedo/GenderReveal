@@ -1,0 +1,48 @@
+{
+  "revealAt": "2026-10-11T20:00:00-03:00",
+  "countdown": {
+    "pageTitle": "El gran anuncio",
+    "eyebrow": "Falta poco",
+    "title": "¿Nena o nene?",
+    "welcome": "Estemos donde estemos, el reloj llega a cero en el mismo instante para todos. Dejá tu voto antes de que pase.",
+    "hostLine": "Con amor, Nik & familia",
+
+    "votePrompt": "¿Vos qué decís que va a ser?",
+    "nameLabel": "Tu nombre",
+    "namePlaceholder": "Escribí tu nombre",
+    "voteButton": "Dejar mi voto",
+    "voteButtonSending": "Guardando…",
+    "votedConfirmation": "Listo, {name}. Anotamos tu voto:",
+    "voteClosedNotice": "La votación ya cerró.",
+    "voteErrorNotice": "No pudimos guardar tu voto. Probá de nuevo.",
+    "offlineNotice": "Sin conexión con el servidor. Reintentando…",
+
+    "tallyTitle": "Cómo viene la votación",
+    "voteSingular": "voto",
+    "votePlural": "votos",
+
+    "girlLabel": "Nena",
+    "boyLabel": "Nene",
+
+    "daysLabel": "días",
+    "hoursLabel": "horas",
+    "minutesLabel": "min",
+    "secondsLabel": "seg"
+  },
+
+  "reveal": {
+    "_comment": "Nothing in this section reaches the browser until the server confirms the moment has passed.",
+
+    "headline": "Es oficial",
+    "girlText": "una nena",
+    "boyText": "un nene",
+    "subtitle": "Gracias por estar acá, aunque sea desde lejos.",
+
+    "correct": "Le pegaste, {name}.",
+    "wrong": "Casi, {name}. Para la próxima.",
+    "noVote": "Llegaste justo para la parte importante.",
+    "score": "{correct} de {total} acertaron.",
+
+    "hostLine": "Con amor, Nik & familia"
+  }
+}

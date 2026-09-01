@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from 'next'
-import { Fraunces, Instrument_Sans } from 'next/font/google'
+import { Grandstander, Nunito } from 'next/font/google'
 import { countdownCopy } from '@/lib/messages'
 import './globals.css'
 
-const display = Fraunces({
+const display = Grandstander({
   subsets: ['latin'],
   variable: '--font-display',
   display: 'swap',
 })
 
-const body = Instrument_Sans({
+const body = Nunito({
   subsets: ['latin'],
   variable: '--font-body',
   display: 'swap',
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#0a0c16',
+  themeColor: '#fff4e6',
   width: 'device-width',
   initialScale: 1,
 }
@@ -30,10 +30,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className={`${display.variable} ${body.variable}`}>
-      <body>
-        <div className="grain" aria-hidden="true" />
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   )
 }

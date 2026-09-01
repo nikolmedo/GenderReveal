@@ -3,9 +3,17 @@
 import { useEffect, useState } from 'react'
 import type { Gender } from '@/lib/messages'
 
-const PIECES = 70
+const PIECES = 90
 
-type Piece = { left: number; delay: number; duration: number; drift: number; spin: number; tone: number; wide: boolean }
+type Piece = {
+  left: number
+  delay: number
+  duration: number
+  drift: number
+  spin: number
+  tone: number
+  shape: 'strip' | 'disc'
+}
 
 /**
  * Generated after mount rather than during render: the values are random, and
@@ -20,12 +28,12 @@ export function Confetti({ gender }: { gender: Gender }) {
     setPieces(
       Array.from({ length: PIECES }, () => ({
         left: Math.random() * 100,
-        delay: Math.random() * 2.6,
-        duration: 3.6 + Math.random() * 3.4,
-        drift: (Math.random() - 0.5) * 220,
-        spin: 360 + Math.random() * 720,
-        tone: Math.floor(Math.random() * 3),
-        wide: Math.random() > 0.55,
+        delay: Math.random() * 1.7,
+        duration: 3.4 + Math.random() * 3.6,
+        drift: (Math.random() - 0.5) * 240,
+        spin: 360 + Math.random() * 900,
+        tone: Math.floor(Math.random() * 4),
+        shape: Math.random() > 0.5 ? 'disc' : 'strip',
       })),
     )
   }, [])
@@ -37,7 +45,7 @@ export function Confetti({ gender }: { gender: Gender }) {
       {pieces.map((piece, index) => (
         <span
           key={index}
-          className={`confetti__piece confetti__piece--t${piece.tone}${piece.wide ? ' confetti__piece--wide' : ''}`}
+          className={`confetti__piece confetti__piece--${piece.shape} confetti__piece--t${piece.tone}`}
           style={
             {
               left: `${piece.left}%`,

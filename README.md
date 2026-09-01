@@ -42,7 +42,7 @@ Votes are rejected with `409` after the hour, for the same reason.
 | Framework | Next.js 15 (App Router) | Zero-config on Vercel; ~106 kB first load |
 | Database | Turso (libSQL) | Real SQLite, spoken over HTTP — see below |
 | Storage adapter | Port + two adapters | Turso in production, `node:sqlite` file locally |
-| Styling | Plain CSS | No framework weight for six components |
+| Styling | Plain CSS | Balloons and confetti are transforms, not a library |
 
 ### Why not a plain SQLite file
 
@@ -178,7 +178,7 @@ app/
   page.tsx              server shell — hands down the countdown, never the answer
   api/state/route.ts    the single source of truth; releases the secret on time
   api/vote/route.ts     accepts guesses, closes at the hour
-components/             Countdown, VotePanel, Reveal, Confetti
+components/             Balloons, Countdown, VotePanel, Reveal, Confetti
 lib/
   config.ts             SERVER ONLY — revealAt, REVEAL_GENDER, withheld copy
   messages.ts           the copy that is safe to ship to browsers

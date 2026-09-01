@@ -1,21 +1,32 @@
 /* ─────────────────────────────────────────────────────────────────────────────
-   An observatory, not a baby shower.
+   A party in a backyard, not an invitation to a wedding.
 
-   The premise of this app is that one instant arrives simultaneously for
-   everyone on Earth, so the countdown is dressed as an astronomical event:
-   deep night, warm cream type, a single amber accent. The pink and the blue
-   are held back entirely until the moment they mean something.
+   Warm paper, fat rounded type, and a sky of balloons that never stops moving.
+   Pink and blue are held in exact balance until the hour — equal numbers of
+   balloons, alternating countdown cards — and the reveal is the moment that
+   balance breaks: half the balloons burst where they float, the rest carry on
+   and the confetti comes down in the colour that won.
    ───────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --ink: #0a0c16;
-  --cream: #f2ebdf;
-  --cream-soft: rgba(242, 235, 223, 0.62);
-  --cream-faint: rgba(242, 235, 223, 0.14);
-  --amber: #e0a44c;
-  --rose: #e5809a;
-  --sky: #74b2de;
+  --cream: #fff4e6;
+  --paper: #fffdf9;
+  --ink: #46325c;
+  --ink-soft: rgba(70, 50, 92, 0.6);
+  --ink-faint: rgba(70, 50, 92, 0.14);
 
+  --rose: #ff6f9c;
+  --rose-deep: #e34a7b;
+  --rose-pale: #ffdfea;
+
+  --sky: #4fb3f0;
+  --sky-deep: #2589cf;
+  --sky-pale: #d8eefd;
+
+  --sun: #ffc94d;
+  --sun-deep: #e8a516;
+
+  --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -33,9 +44,9 @@ body {
 }
 
 body {
-  background: var(--ink);
-  color: var(--cream);
-  font-family: var(--font-body), system-ui, sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body), ui-rounded, system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
@@ -47,16 +58,11 @@ p {
   margin: 0;
 }
 
-/* ── Atmosphere ──────────────────────────────────────────────────────────── */
+/* ── The world: sky, balloons, and whichever screen is showing ───────────── */
 
-.grain {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  pointer-events: none;
-  opacity: 0.055;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+.world {
+  position: relative;
+  min-height: 100dvh;
 }
 
 .sky {
@@ -65,60 +71,233 @@ p {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(1px 1px at 18% 22%, rgba(242, 235, 223, 0.7), transparent),
-    radial-gradient(1px 1px at 63% 12%, rgba(242, 235, 223, 0.5), transparent),
-    radial-gradient(1.5px 1.5px at 82% 41%, rgba(224, 164, 76, 0.55), transparent),
-    radial-gradient(1px 1px at 34% 68%, rgba(242, 235, 223, 0.45), transparent),
-    radial-gradient(1px 1px at 91% 77%, rgba(242, 235, 223, 0.4), transparent),
-    radial-gradient(1px 1px at 8% 84%, rgba(242, 235, 223, 0.35), transparent),
-    radial-gradient(1.5px 1.5px at 47% 33%, rgba(242, 235, 223, 0.3), transparent),
-    radial-gradient(120% 90% at 50% 118%, rgba(56, 44, 96, 0.55), transparent 62%),
-    radial-gradient(80% 60% at 50% -18%, rgba(24, 40, 78, 0.6), transparent 68%);
-  animation: shimmer 9s ease-in-out infinite alternate;
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.9) 0 6px, transparent 7px),
+    radial-gradient(circle at 78% 9%, rgba(255, 255, 255, 0.8) 0 4px, transparent 5px),
+    radial-gradient(circle at 42% 62%, rgba(255, 255, 255, 0.7) 0 5px, transparent 6px),
+    radial-gradient(circle at 88% 74%, rgba(255, 255, 255, 0.8) 0 5px, transparent 6px),
+    radial-gradient(circle at 24% 88%, rgba(255, 255, 255, 0.7) 0 4px, transparent 5px),
+    radial-gradient(150% 85% at 50% -12%, #ffeed9 0%, var(--cream) 52%, #fffaf2 100%);
+  background-size: 260px 260px, 320px 320px, 290px 290px, 240px 240px, 300px 300px, cover;
+  transition: background-color 1400ms ease;
 }
 
-@keyframes shimmer {
-  from { opacity: 0.75; }
+/* The sky takes on the winning colour the moment the envelope opens. */
+.world--girl .sky {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.85) 0 6px, transparent 7px),
+    radial-gradient(circle at 78% 9%, rgba(255, 255, 255, 0.75) 0 4px, transparent 5px),
+    radial-gradient(circle at 42% 62%, rgba(255, 255, 255, 0.7) 0 5px, transparent 6px),
+    radial-gradient(circle at 88% 74%, rgba(255, 255, 255, 0.75) 0 5px, transparent 6px),
+    radial-gradient(circle at 24% 88%, rgba(255, 255, 255, 0.65) 0 4px, transparent 5px),
+    radial-gradient(140% 90% at 50% -10%, #ffd3e3 0%, #ffe4ee 45%, #fff3f7 100%);
+  animation: tint 1400ms ease both;
+}
+
+.world--boy .sky {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.85) 0 6px, transparent 7px),
+    radial-gradient(circle at 78% 9%, rgba(255, 255, 255, 0.75) 0 4px, transparent 5px),
+    radial-gradient(circle at 42% 62%, rgba(255, 255, 255, 0.7) 0 5px, transparent 6px),
+    radial-gradient(circle at 88% 74%, rgba(255, 255, 255, 0.75) 0 5px, transparent 6px),
+    radial-gradient(circle at 24% 88%, rgba(255, 255, 255, 0.65) 0 4px, transparent 5px),
+    radial-gradient(140% 90% at 50% -10%, #c9e8fd 0%, #ddf1fe 45%, #f2faff 100%);
+  animation: tint 1400ms ease both;
+}
+
+@keyframes tint {
+  from { opacity: 0.15; }
   to   { opacity: 1; }
 }
 
-/* ── Stage ───────────────────────────────────────────────────────────────── */
+/* ── Balloons ────────────────────────────────────────────────────────────── */
+
+.balloons {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.balloon {
+  position: absolute;
+  bottom: -34vh;
+  animation-name: rise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes rise {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-155vh); }
+}
+
+.balloon__body {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 6;
+  border-radius: 50% 50% 47% 47% / 45% 45% 62% 62%;
+  animation: sway 4.5s ease-in-out infinite alternate;
+}
+
+@keyframes sway {
+  from { transform: translateX(calc(var(--sway) * -0.5)) rotate(calc(var(--tilt) * -1)); }
+  to   { transform: translateX(calc(var(--sway) * 0.5)) rotate(var(--tilt)); }
+}
+
+/* The knot. */
+.balloon__body::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 12px;
+  height: 9px;
+  translate: -50% 0;
+  border-radius: 3px 3px 50% 50%;
+  background: inherit;
+  filter: brightness(0.92);
+}
+
+.balloon__shine {
+  position: absolute;
+  top: 12%;
+  left: 16%;
+  width: 30%;
+  height: 34%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.62);
+  filter: blur(3px);
+}
+
+.balloon__string {
+  display: block;
+  width: 46%;
+  height: 62px;
+  margin-left: 27%;
+  border-right: 2px solid rgba(70, 50, 92, 0.2);
+  border-bottom: 2px solid rgba(70, 50, 92, 0.2);
+  border-radius: 0 0 70% 0;
+}
+
+.balloon--dim {
+  opacity: 0.4;
+}
+
+.balloon--girl {
+  color: var(--rose-deep);
+}
+
+.balloon--girl .balloon__body {
+  background: radial-gradient(circle at 32% 26%, #ffa6c4 0%, var(--rose) 52%, var(--rose-deep) 100%);
+}
+
+.balloon--boy {
+  color: var(--sky-deep);
+}
+
+.balloon--boy .balloon__body {
+  background: radial-gradient(circle at 32% 26%, #9ad4f9 0%, var(--sky) 52%, var(--sky-deep) 100%);
+}
+
+/* The losing colour bursts where it floats, staggered so it reads as a ripple
+   rather than every balloon vanishing on the same frame. */
+.balloon--popping {
+  animation-play-state: paused;
+}
+
+.balloon--popping .balloon__body {
+  animation: pop 520ms var(--bounce) var(--pop-delay) forwards;
+}
+
+.balloon--popping .balloon__string {
+  animation: snap 400ms ease-in var(--pop-delay) forwards;
+}
+
+.balloon--popping::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: 100%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  border: 3px solid currentColor;
+  opacity: 0;
+  animation: burst 520ms ease-out var(--pop-delay) forwards;
+}
+
+@keyframes pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.3); }
+  62%  { transform: scale(1.36); opacity: 1; }
+  100% { transform: scale(0.08); opacity: 0; }
+}
+
+@keyframes burst {
+  0%   { opacity: 0; scale: 0.55; }
+  50%  { opacity: 0.85; scale: 1; }
+  100% { opacity: 0; scale: 2; }
+}
+
+@keyframes snap {
+  to { opacity: 0; transform: translateY(28px) rotate(18deg); }
+}
+
+/* ── Countdown screen ────────────────────────────────────────────────────── */
 
 .stage {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: clamp(1.5rem, 5vw, 4rem) 1.25rem;
-  transition: opacity 420ms ease, filter 420ms ease;
+  padding: clamp(1.5rem, 5vw, 3.5rem) 1.1rem;
+  transition: opacity 400ms ease;
 }
 
 .stage--closing {
-  opacity: 0.32;
-  filter: blur(6px);
+  opacity: 0.28;
 }
 
 .stage__inner {
   position: relative;
-  z-index: 2;
   width: 100%;
-  max-width: 40rem;
+  max-width: 34rem;
   display: flex;
   flex-direction: column;
-  gap: clamp(2rem, 5vw, 3.25rem);
+  gap: clamp(1.6rem, 4vw, 2.4rem);
 }
 
 .stage__inner > * {
-  animation: rise 900ms var(--ease-out) backwards;
+  animation: pop-in 700ms var(--bounce) backwards;
 }
 .stage__inner > *:nth-child(1) { animation-delay: 60ms; }
-.stage__inner > *:nth-child(2) { animation-delay: 200ms; }
-.stage__inner > *:nth-child(3) { animation-delay: 340ms; }
-.stage__inner > *:nth-child(4) { animation-delay: 480ms; }
+.stage__inner > *:nth-child(2) { animation-delay: 180ms; }
+.stage__inner > *:nth-child(3) { animation-delay: 300ms; }
+.stage__inner > *:nth-child(4) { animation-delay: 420ms; }
 
-@keyframes rise {
-  from { opacity: 0; transform: translateY(14px); }
+/* A soft wash of paper behind the reading column, so a balloon drifting past
+   never costs anyone a word of it. */
+.stage__inner::before {
+  content: "";
+  position: absolute;
+  inset: -6% -14%;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(255, 250, 242, 0.95) 0%,
+    rgba(255, 250, 242, 0.78) 58%,
+    rgba(255, 250, 242, 0) 100%
+  );
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(18px) scale(0.94); }
   to   { opacity: 1; transform: none; }
 }
 
@@ -128,98 +307,111 @@ p {
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.6rem;
 }
 
 .intro__eyebrow {
-  font-size: 0.7rem;
-  letter-spacing: 0.34em;
+  align-self: center;
+  padding: 0.3rem 0.95rem;
+  border-radius: 999px;
+  background: var(--sun);
+  color: #6a4a00;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--amber);
+  rotate: -2deg;
+  box-shadow: 0 3px 0 var(--sun-deep);
 }
 
 .intro__title {
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 400;
-  font-size: clamp(2.4rem, 8vw, 3.6rem);
-  line-height: 1.02;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display), ui-rounded, system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.3rem, 9vw, 3.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  color: var(--ink);
 }
 
 .intro__welcome {
-  color: var(--cream-soft);
-  font-size: 0.98rem;
-  max-width: 30rem;
+  color: var(--ink-soft);
+  font-size: 0.97rem;
+  font-weight: 600;
+  max-width: 26rem;
   margin-inline: auto;
   text-wrap: balance;
 }
 
-/* ── Countdown ───────────────────────────────────────────────────────────── */
+/* ── Countdown cards ─────────────────────────────────────────────────────── */
 
 .clock {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.25rem;
-  padding: clamp(1.1rem, 3vw, 1.6rem) 0;
-  border-top: 1px solid var(--cream-faint);
-  border-bottom: 1px solid var(--cream-faint);
+  gap: clamp(0.4rem, 2vw, 0.7rem);
   transition: opacity 400ms ease;
 }
 
 .clock--waiting {
-  opacity: 0.4;
+  opacity: 0.45;
 }
 
-.clock__unit {
-  position: relative;
+.card {
+  padding: clamp(0.7rem, 2.5vw, 1rem) 0.2rem clamp(0.5rem, 2vw, 0.7rem);
+  border: 3px solid;
+  border-radius: 20px;
+  text-align: center;
+  background: var(--paper);
+}
+
+.card:nth-child(odd)  { rotate: -2deg; }
+.card:nth-child(even) { rotate: 2deg; }
+
+.card--girl {
+  border-color: var(--rose);
+  background: var(--rose-pale);
+  box-shadow: 0 5px 0 var(--rose);
+}
+
+.card--boy {
+  border-color: var(--sky);
+  background: var(--sky-pale);
+  box-shadow: 0 5px 0 var(--sky);
+}
+
+.card__digits {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.clock__unit + .clock__unit::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 12%;
-  bottom: 34%;
-  width: 1px;
-  background: var(--cream-faint);
-}
-
-.clock__digits {
-  display: flex;
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 300;
-  font-size: clamp(2.1rem, 11vw, 4.25rem);
-  line-height: 1;
-  letter-spacing: -0.03em;
+  justify-content: center;
+  font-family: var(--font-display), ui-rounded, system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.7rem, 8.5vw, 3rem);
+  line-height: 1.05;
+  color: var(--ink);
 }
 
 /* Fixed cells, so the numbers never shuffle sideways as they tick. */
-.clock__digit {
+.card__digit {
   display: inline-block;
   width: 0.62em;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
 
-.clock__label {
-  font-size: 0.62rem;
-  letter-spacing: 0.24em;
+.card__label {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--cream-soft);
+  color: var(--ink-soft);
 }
 
-.clock--imminent .clock__digits {
-  color: var(--amber);
-  animation: pulse 1s ease-in-out infinite;
+.clock--imminent .card {
+  animation: jiggle 0.9s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.55; }
+@keyframes jiggle {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-4px) scale(1.03); }
 }
 
 /* ── Vote panel ──────────────────────────────────────────────────────────── */
@@ -227,35 +419,38 @@ p {
 .panel {
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
-  padding: clamp(1.3rem, 4vw, 1.9rem);
-  border: 1px solid var(--cream-faint);
-  border-radius: 3px;
-  background: linear-gradient(160deg, rgba(20, 26, 48, 0.82), rgba(10, 12, 22, 0.62));
-  backdrop-filter: blur(10px);
+  gap: 1.4rem;
+  padding: clamp(1.1rem, 4vw, 1.6rem);
+  border: 3px solid var(--ink-faint);
+  border-radius: 26px;
+  background: var(--paper);
+  box-shadow: 0 7px 0 rgba(70, 50, 92, 0.09);
 }
 
 .panel--ghost {
-  min-height: 17rem;
-  opacity: 0.3;
+  min-height: 16rem;
+  opacity: 0.35;
 }
 
 .panel__confirmation {
-  font-size: 0.95rem;
-  color: var(--cream-soft);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink-soft);
   text-align: center;
 }
 
 .ballot {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.9rem;
 }
 
 .ballot__prompt {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-display), ui-rounded, system-ui, sans-serif;
+  font-weight: 700;
   font-size: 1.25rem;
   text-align: center;
+  text-wrap: balance;
 }
 
 .ballot__choices {
@@ -268,94 +463,118 @@ p {
   appearance: none;
   cursor: pointer;
   padding: 0.95rem 0.5rem;
-  border-radius: 2px;
-  background: transparent;
-  color: var(--cream);
-  font-family: var(--font-display), Georgia, serif;
+  border-radius: 999px;
+  border: 3px solid;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-display), ui-rounded, system-ui, sans-serif;
   font-size: 1.1rem;
-  transition: background 220ms ease, color 220ms ease, transform 220ms var(--ease-out);
+  font-weight: 700;
+  transition: transform 180ms var(--bounce), background 200ms ease, box-shadow 200ms ease;
 }
 
-.choice--girl { border: 1px solid rgba(229, 128, 154, 0.55); }
-.choice--boy  { border: 1px solid rgba(116, 178, 222, 0.55); }
+.choice--girl {
+  border-color: var(--rose);
+  box-shadow: 0 4px 0 var(--rose);
+}
 
-.choice:hover { transform: translateY(-2px); }
+.choice--boy {
+  border-color: var(--sky);
+  box-shadow: 0 4px 0 var(--sky);
+}
+
+.choice:hover {
+  transform: translateY(-3px);
+}
+
+.choice--picked {
+  color: #fff;
+  transform: translateY(2px);
+}
 
 .choice--girl.choice--picked {
   background: var(--rose);
-  border-color: var(--rose);
-  color: #2a0d17;
+  box-shadow: 0 2px 0 var(--rose-deep);
 }
 
 .choice--boy.choice--picked {
   background: var(--sky);
-  border-color: var(--sky);
-  color: #06202f;
+  box-shadow: 0 2px 0 var(--sky-deep);
 }
 
 .ballot__field {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 
 .ballot__field > span {
   font-size: 0.66rem;
-  letter-spacing: 0.22em;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--cream-soft);
+  color: var(--ink-soft);
+  padding-left: 0.9rem;
 }
 
 .ballot__field input {
   width: 100%;
-  padding: 0.8rem 0.85rem;
-  border: 1px solid var(--cream-faint);
-  border-radius: 2px;
-  background: rgba(10, 12, 22, 0.6);
-  color: var(--cream);
+  padding: 0.85rem 1rem;
+  border: 3px solid var(--ink-faint);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
   font-family: inherit;
   font-size: 1rem;
-  transition: border-color 200ms ease;
+  font-weight: 700;
+  transition: border-color 180ms ease;
 }
 
 .ballot__field input::placeholder {
-  color: rgba(242, 235, 223, 0.28);
+  color: rgba(70, 50, 92, 0.32);
+  font-weight: 600;
 }
 
 .ballot__field input:focus {
   outline: none;
-  border-color: var(--amber);
+  border-color: var(--sun);
 }
 
 .ballot__submit {
   appearance: none;
   cursor: pointer;
-  margin-top: 0.25rem;
-  padding: 0.9rem;
+  margin-top: 0.2rem;
+  padding: 0.95rem;
   border: none;
-  border-radius: 2px;
-  background: var(--amber);
-  color: #1a1204;
-  font-family: inherit;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  transition: opacity 200ms ease, transform 220ms var(--ease-out);
+  border-radius: 999px;
+  background: var(--sun);
+  color: #6a4a00;
+  font-family: var(--font-display), ui-rounded, system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  box-shadow: 0 5px 0 var(--sun-deep);
+  transition: transform 180ms var(--bounce), opacity 200ms ease;
 }
 
 .ballot__submit:hover:not(:disabled) {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+}
+
+.ballot__submit:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 var(--sun-deep);
 }
 
 .ballot__submit:disabled {
-  opacity: 0.32;
+  opacity: 0.4;
   cursor: not-allowed;
+  box-shadow: 0 5px 0 rgba(70, 50, 92, 0.15);
 }
 
 .ballot__error {
-  font-size: 0.85rem;
-  color: var(--rose);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--rose-deep);
   text-align: center;
 }
 
@@ -364,25 +583,28 @@ p {
 .tally {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
-  padding-top: 1.4rem;
-  border-top: 1px solid var(--cream-faint);
+  gap: 0.6rem;
+  padding-top: 1.2rem;
+  border-top: 3px dotted var(--ink-faint);
 }
 
 .tally__title {
   font-size: 0.62rem;
-  letter-spacing: 0.24em;
+  font-weight: 800;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--cream-soft);
+  color: var(--ink-soft);
   text-align: center;
 }
 
 .tally__bar {
   display: flex;
-  height: 6px;
+  height: 16px;
   border-radius: 999px;
   overflow: hidden;
-  background: rgba(242, 235, 223, 0.08);
+  background: var(--ink-faint);
+  border: 2px solid var(--paper);
+  box-shadow: 0 0 0 2px var(--ink-faint);
 }
 
 .tally__fill {
@@ -395,123 +617,130 @@ p {
 .tally__legend {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   font-size: 0.85rem;
+  font-weight: 700;
 }
 
 .tally__legend b {
-  font-family: var(--font-display), Georgia, serif;
-  font-size: 1.15rem;
-  font-weight: 400;
+  font-family: var(--font-display), ui-rounded, system-ui, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
 }
 
 .tally__total {
-  font-size: 0.66rem;
-  letter-spacing: 0.16em;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--cream-soft);
+  color: var(--ink-soft);
 }
 
-.ink--girl { color: var(--rose); }
-.ink--boy  { color: var(--sky); }
+.ink--girl { color: var(--rose-deep); }
+.ink--boy  { color: var(--sky-deep); }
 
 /* ── Outro ───────────────────────────────────────────────────────────────── */
 
 .outro {
   text-align: center;
-  font-size: 0.78rem;
-  letter-spacing: 0.1em;
-  color: rgba(242, 235, 223, 0.38);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink-soft);
 }
 
 .outro__warning {
-  margin-top: 0.5rem;
-  color: var(--amber);
+  margin-top: 0.4rem;
+  color: var(--sun-deep);
 }
 
-/* ── Reveal ──────────────────────────────────────────────────────────────── */
+/* ── Reveal screen ───────────────────────────────────────────────────────── */
 
 .reveal {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: clamp(1.5rem, 5vw, 4rem) 1.25rem;
-  overflow: hidden;
-  animation: wash 1100ms var(--ease-out) both;
-}
-
-.reveal--girl {
-  background:
-    radial-gradient(90% 70% at 50% 8%, rgba(255, 190, 208, 0.4), transparent 60%),
-    linear-gradient(168deg, #a5305a 0%, #6d1738 58%, #3d0c20 100%);
-}
-
-.reveal--boy {
-  background:
-    radial-gradient(90% 70% at 50% 8%, rgba(178, 222, 255, 0.36), transparent 60%),
-    linear-gradient(168deg, #1f6ea3 0%, #0f4266 58%, #07223a 100%);
-}
-
-@keyframes wash {
-  from { opacity: 0; transform: scale(1.04); }
-  to   { opacity: 1; transform: none; }
+  padding: clamp(1.5rem, 5vw, 3.5rem) 1.1rem;
 }
 
 .reveal__inner {
-  position: relative;
-  z-index: 3;
-  max-width: 34rem;
+  max-width: 32rem;
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.7rem;
 }
 
 .reveal__headline {
-  font-size: 0.7rem;
-  letter-spacing: 0.42em;
+  align-self: center;
+  padding: 0.35rem 1.1rem;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(255, 250, 244, 0.7);
+  rotate: -3deg;
+  animation: pop-in 600ms var(--bounce) both;
+}
+
+.reveal--girl .reveal__headline {
+  color: var(--rose-deep);
+  box-shadow: 0 4px 0 var(--rose);
+}
+
+.reveal--boy .reveal__headline {
+  color: var(--sky-deep);
+  box-shadow: 0 4px 0 var(--sky);
 }
 
 .reveal__word {
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 400;
-  font-size: clamp(3rem, 15vw, 6rem);
-  line-height: 0.96;
-  letter-spacing: -0.035em;
-  color: #fffaf4;
+  font-family: var(--font-display), ui-rounded, system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.8rem, 14vw, 5.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: #fff;
   text-wrap: balance;
-  animation: land 1200ms var(--ease-out) 200ms backwards;
+  animation: land 900ms var(--bounce) 250ms backwards;
+}
+
+.reveal--girl .reveal__word {
+  text-shadow: 0 5px 0 var(--rose-deep), 0 14px 26px rgba(227, 74, 123, 0.28);
+}
+
+.reveal--boy .reveal__word {
+  text-shadow: 0 5px 0 var(--sky-deep), 0 14px 26px rgba(37, 137, 207, 0.28);
 }
 
 @keyframes land {
-  from { opacity: 0; transform: scale(1.22); filter: blur(14px); }
-  to   { opacity: 1; transform: none; filter: none; }
+  from { opacity: 0; transform: scale(0.4) rotate(-6deg); }
+  to   { opacity: 1; transform: none; }
 }
 
 .reveal__subtitle {
-  color: rgba(255, 250, 244, 0.72);
-  font-size: 0.98rem;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  font-weight: 700;
   text-wrap: balance;
 }
 
 .verdict {
-  margin-top: 1.75rem;
-  padding: 1.4rem 1.2rem;
-  border: 1px solid rgba(255, 250, 244, 0.24);
-  border-radius: 3px;
-  background: rgba(0, 0, 0, 0.18);
-  backdrop-filter: blur(6px);
+  margin-top: 1.3rem;
+  padding: 1.3rem 1.1rem;
+  border-radius: 26px;
+  background: var(--paper);
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.4rem;
   opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
+  transform: translateY(16px) scale(0.94);
+  transition: opacity 600ms var(--bounce), transform 600ms var(--bounce);
 }
+
+.reveal--girl .verdict { box-shadow: 0 6px 0 var(--rose); }
+.reveal--boy .verdict  { box-shadow: 0 6px 0 var(--sky); }
 
 .reveal[data-act="1"] .verdict,
 .reveal[data-act="2"] .verdict {
@@ -520,35 +749,38 @@ p {
 }
 
 .verdict__line {
-  font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(1.25rem, 5vw, 1.7rem);
-  line-height: 1.15;
-  color: #fffaf4;
+  font-family: var(--font-display), ui-rounded, system-ui, sans-serif;
+  font-size: clamp(1.2rem, 5vw, 1.6rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--ink);
 }
 
 .verdict__line--hit::after {
   content: "";
   display: block;
-  width: 2.5rem;
-  height: 1px;
-  margin: 0.7rem auto 0;
-  background: rgba(255, 250, 244, 0.6);
+  width: 3rem;
+  height: 4px;
+  margin: 0.6rem auto 0;
+  border-radius: 999px;
+  background: var(--sun);
 }
 
 .verdict__score {
-  font-size: 0.68rem;
-  letter-spacing: 0.2em;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 250, 244, 0.7);
+  color: var(--ink-soft);
 }
 
 .reveal__host {
-  margin-top: 1.5rem;
-  font-size: 0.78rem;
-  letter-spacing: 0.1em;
-  color: rgba(255, 250, 244, 0.45);
+  margin-top: 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink-soft);
   opacity: 0;
-  transition: opacity 900ms ease;
+  transition: opacity 800ms ease;
 }
 
 .reveal[data-act="2"] .reveal__host {
@@ -558,52 +790,62 @@ p {
 /* ── Confetti ────────────────────────────────────────────────────────────── */
 
 .confetti {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  z-index: 2;
+  z-index: 3;
   pointer-events: none;
   overflow: hidden;
 }
 
 .confetti__piece {
   position: absolute;
-  top: -8vh;
-  width: 7px;
-  height: 12px;
-  border-radius: 1px;
+  top: -10vh;
   animation-name: fall;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }
 
-.confetti__piece--wide {
-  width: 12px;
-  height: 5px;
-  border-radius: 999px;
+.confetti__piece--strip {
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
 }
 
-.confetti--girl .confetti__piece--t0 { background: #ffd7e2; }
-.confetti--girl .confetti__piece--t1 { background: #ffb0c6; }
-.confetti--girl .confetti__piece--t2 { background: #f6dfae; }
+.confetti__piece--disc {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
 
-.confetti--boy .confetti__piece--t0 { background: #d3ecff; }
-.confetti--boy .confetti__piece--t1 { background: #9ed2f7; }
-.confetti--boy .confetti__piece--t2 { background: #f6dfae; }
+.confetti--girl .confetti__piece--t0 { background: #e34a7b; }
+.confetti--girl .confetti__piece--t1 { background: #ff6f9c; }
+.confetti--girl .confetti__piece--t2 { background: #ffb3cc; }
+.confetti--girl .confetti__piece--t3 { background: #fff0f5; }
+
+.confetti--boy .confetti__piece--t0 { background: #2589cf; }
+.confetti--boy .confetti__piece--t1 { background: #4fb3f0; }
+.confetti--boy .confetti__piece--t2 { background: #9ad4f9; }
+.confetti--boy .confetti__piece--t3 { background: #f0f8ff; }
 
 @keyframes fall {
   from {
     transform: translate3d(0, 0, 0) rotate(0deg);
     opacity: 0;
   }
-  8%  { opacity: 1; }
-  90% { opacity: 1; }
+  7%  { opacity: 1; }
+  92% { opacity: 1; }
   to {
-    transform: translate3d(var(--drift), 112vh, 0) rotate(var(--spin));
+    transform: translate3d(var(--drift), 116vh, 0) rotate(var(--spin));
     opacity: 0;
   }
 }
 
 /* ── Accessibility ───────────────────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 3px solid var(--sun-deep);
+  outline-offset: 3px;
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -614,23 +856,25 @@ p {
     transition-duration: 0.01ms !important;
   }
 
-  .stage--closing {
-    filter: none;
+  /* Balloons still decorate the page; they just stop travelling. */
+  .balloon {
+    animation: none !important;
+    bottom: auto;
+    top: var(--rest);
+  }
+
+  .balloon__body {
+    animation: none !important;
+  }
+
+  .balloon--popping {
+    display: none;
   }
 }
 
-:focus-visible {
-  outline: 2px solid var(--amber);
-  outline-offset: 3px;
-}
-
-@media (max-width: 380px) {
-  .clock {
-    gap: 0;
-  }
-
-  .clock__label {
-    font-size: 0.55rem;
-    letter-spacing: 0.14em;
+@media (max-width: 360px) {
+  .card__label {
+    font-size: 0.52rem;
+    letter-spacing: 0.08em;
   }
 }

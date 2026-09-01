@@ -29,19 +29,20 @@ export function Countdown({
       className={`clock${ready ? '' : ' clock--waiting'}${finalMinute ? ' clock--imminent' : ''}`}
       aria-label="Cuenta regresiva"
     >
-      {split(remainingMs, copy).map((unit) => (
-        <div className="clock__unit" key={unit.label}>
-          <div className="clock__digits">
+      {split(remainingMs, copy).map((unit, index) => (
+        // Cards alternate pink and blue so neither colour leads before the hour.
+        <div className={`card card--${index % 2 === 0 ? 'girl' : 'boy'}`} key={unit.label}>
+          <div className="card__digits">
             {String(unit.value)
               .padStart(2, '0')
               .split('')
               .map((digit, position) => (
-                <span className="clock__digit" key={`${unit.label}-${position}`}>
+                <span className="card__digit" key={`${unit.label}-${position}`}>
                   {digit}
                 </span>
               ))}
           </div>
-          <span className="clock__label">{unit.label}</span>
+          <span className="card__label">{unit.label}</span>
         </div>
       ))}
     </section>

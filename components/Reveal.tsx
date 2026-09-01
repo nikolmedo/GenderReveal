@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { fill, type Gender, type RevealCopy } from '@/lib/messages'
 import type { MyVote } from '@/lib/myVote'
-import { Confetti } from '@/components/Confetti'
 
 type Props = {
   copy: RevealCopy
@@ -17,7 +16,7 @@ export function Reveal({ copy, gender, total, correct, myVote }: Props) {
   // Staged entrance: the word lands first, the personal verdict a beat later.
   const [act, setAct] = useState(0)
   useEffect(() => {
-    const timers = [setTimeout(() => setAct(1), 900), setTimeout(() => setAct(2), 2100)]
+    const timers = [setTimeout(() => setAct(1), 1000), setTimeout(() => setAct(2), 2200)]
     return () => timers.forEach(clearTimeout)
   }, [])
 
@@ -33,8 +32,6 @@ export function Reveal({ copy, gender, total, correct, myVote }: Props) {
 
   return (
     <main className={`reveal reveal--${gender}`} data-act={act}>
-      <Confetti gender={gender} />
-
       <div className="reveal__inner">
         <p className="reveal__headline">{copy.headline}</p>
         <h1 className="reveal__word">{copy.word}</h1>

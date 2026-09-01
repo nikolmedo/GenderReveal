@@ -5,16 +5,18 @@ import type { Gender } from '@/lib/messages'
 
 export type MyVote = { voterId: string; name: string; choice: Gender }
 
-const STORAGE_KEY = 'genderreveal:vote:v1'
+// Keyed per reveal: one browser can be a guest at two parties at once, and
+// each one owes that guest its own verdict.
+const storageKey = (hash: string) => `genderreveal:vote:v1:${hash}`
 
 function newVoterId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
 }
 
-function read(): MyVote | null {
+function read(key: string): MyVote | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(key)
     if (!raw) return null
     const parsed = JSON.parse(raw) as Partial<MyVote>
     if (!parsed.voterId || !parsed.name || (parsed.choice !== 'girl' && parsed.choice !== 'boy')) return null
@@ -29,19 +31,19 @@ function read(): MyVote | null {
  * personally whether they got it right — without the server ever needing to
  * know who they are.
  */
-export function useMyVote() {
+export function useMyVote(hash: string) {
   const [vote, setVote] = useState<MyVote | null>(null)
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    setVote(read())
+    setVote(read(storageKey(hash)))
     setLoaded(true)
-  }, [])
+  }, [hash])
 
   const save = (name: string, choice: Gender): MyVote => {
     const next: MyVote = { voterId: vote?.voterId ?? newVoterId(), name, choice }
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+      localStorage.setItem(storageKey(hash), JSON.stringify(next))
     } catch {
       // Private browsing can refuse writes. The vote still counts on the server;
       // this visitor just will not get the personal verdict.

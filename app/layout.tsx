@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next'
 import { Grandstander, Nunito } from 'next/font/google'
-import { countdownCopy } from '@/lib/messages'
 import './globals.css'
 
 const display = Grandstander({
@@ -16,8 +15,7 @@ const body = Nunito({
 })
 
 export const metadata: Metadata = {
-  title: countdownCopy.pageTitle,
-  description: countdownCopy.welcome,
+  title: 'Countdown',
   robots: { index: false, follow: false },
 }
 

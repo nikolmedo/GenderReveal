@@ -1,11 +1,15 @@
 {
-  "revealAt": "2026-10-11T20:00:00-03:00",
+  "colors": {
+    "girl": "#ff6f9c",
+    "boy": "#4fb3f0"
+  },
+
   "countdown": {
     "pageTitle": "El gran anuncio",
     "eyebrow": "Falta poco",
     "title": "¿Nena o nene?",
     "welcome": "Estemos donde estemos, el reloj llega a cero en el mismo instante para todos. Dejá tu voto antes de que pase.",
-    "hostLine": "Con amor, Nik & familia",
+    "hostLine": "Con amor, la familia",
 
     "votePrompt": "¿Vos qué decís que va a ser?",
     "nameLabel": "Tu nombre",
@@ -31,8 +35,6 @@
   },
 
   "reveal": {
-    "_comment": "Nothing in this section reaches the browser until the server confirms the moment has passed.",
-
     "headline": "Es oficial",
     "girlText": "una nena",
     "boyText": "un nene",
@@ -43,6 +45,6 @@
     "noVote": "Llegaste justo para la parte importante.",
     "score": "{correct} de {total} acertaron.",
 
-    "hostLine": "Con amor, Nik & familia"
+    "hostLine": "Con amor, la familia"
   }
 }

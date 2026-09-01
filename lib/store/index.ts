@@ -1,6 +1,6 @@
-import type { VoteStore } from '@/lib/store/types'
+import type { RevealStore } from '@/lib/store/types'
 
-let store: VoteStore | null = null
+let store: RevealStore | null = null
 
 /**
  * Async, and the local adapter is imported dynamically, because a static import
@@ -8,7 +8,7 @@ let store: VoteStore | null = null
  * in production, where that adapter is never used and the runtime may not
  * expose the module at all.
  */
-export async function votesStore(): Promise<VoteStore> {
+export async function revealStore(): Promise<RevealStore> {
   if (store) return store
 
   const url = process.env.TURSO_DATABASE_URL?.trim()
@@ -21,7 +21,7 @@ export async function votesStore(): Promise<VoteStore> {
 
   if (process.env.NODE_ENV === 'production') {
     throw new Error(
-      'TURSO_DATABASE_URL is missing. The Vercel filesystem is ephemeral: without Turso, votes are lost between requests.',
+      'TURSO_DATABASE_URL is missing. The Vercel filesystem is ephemeral: without Turso, reveals and votes are lost between requests.',
     )
   }
 

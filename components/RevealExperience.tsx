@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import type { CountdownCopy } from '@/lib/messages'
 import { useMyVote } from '@/lib/myVote'
 import { useRevealState } from '@/lib/useRevealState'
@@ -11,14 +11,16 @@ import { VotePanel } from '@/components/VotePanel'
 import { Reveal } from '@/components/Reveal'
 
 type Props = {
+  hash: string
   revealAt: number
   serverNow: number
   copy: CountdownCopy
+  palette: Record<string, string>
 }
 
-export function RevealExperience({ revealAt, serverNow, copy }: Props) {
-  const state = useRevealState(revealAt, serverNow)
-  const { vote, loaded, save } = useMyVote()
+export function RevealExperience({ hash, revealAt, serverNow, copy, palette }: Props) {
+  const state = useRevealState(hash, revealAt, serverNow)
+  const { vote, loaded, save } = useMyVote(hash)
 
   // Hold one beat after the server confirms, so the balloons bursting and the
   // sky changing colour read as an event rather than a repaint.
@@ -33,11 +35,22 @@ export function RevealExperience({ revealAt, serverNow, copy }: Props) {
   const showReveal = winner !== null && state.copy !== null
   const closing = state.revealed || state.remainingMs <= 0
 
+  // The creator's two colours drive every shade on the page. The winning
+  // tint only arrives with the reveal payload, so it cannot be read early.
+  const skin: CSSProperties = { ...palette } as CSSProperties
+  if (winner && state.tint) {
+    Object.assign(skin, {
+      '--tint-1': state.tint[0],
+      '--tint-2': state.tint[1],
+      '--tint-3': state.tint[2],
+    })
+  }
+
   return (
     // The balloons sit outside the countdown/reveal swap on purpose: they are
     // the thread that carries the moment across, instead of one screen being
     // replaced by another.
-    <div className={`world${winner ? ` world--${winner}` : ''}`}>
+    <div className={`world${winner ? ` world--${winner}` : ''}`} style={skin}>
       <div className="sky" aria-hidden="true" />
       <Balloons winner={winner} />
       {winner && <Confetti gender={winner} />}
@@ -62,6 +75,7 @@ export function RevealExperience({ revealAt, serverNow, copy }: Props) {
             <Countdown remainingMs={state.remainingMs} copy={copy} ready={state.ready} />
 
             <VotePanel
+              hash={hash}
               copy={copy}
               counts={state.counts}
               myVote={vote}

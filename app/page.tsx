@@ -1,17 +1,19 @@
-import { RevealExperience } from '@/components/RevealExperience'
-import { revealAt } from '@/lib/config'
-import { countdownCopy } from '@/lib/messages'
+import type { Metadata } from 'next'
+import { Configurator } from '@/components/Configurator'
+import { defaultConfig } from '@/lib/messages'
+import { MAX_HORIZON_DAYS, RETENTION_DAYS } from '@/lib/reveals'
 
-export const dynamic = 'force-dynamic'
+export const metadata: Metadata = {
+  title: 'Armá tu reveal',
+  description: 'Configurá la hora, el sexo, los textos y los colores, y llevate un link para compartir.',
+}
 
-/**
- * Server shell. It hands the client the countdown and everything around it —
- * and deliberately nothing about the outcome, which only /api/state releases,
- * and only once the moment has actually passed.
- */
-export default function Page() {
-  // Handing the render clock down as a prop keeps the server's markup and the
-  // client's first render byte-identical. Reading Date.now() on both sides
-  // instead would put two different numbers on screen and break hydration.
-  return <RevealExperience revealAt={revealAt} serverNow={Date.now()} copy={countdownCopy} />
+export default function HomePage() {
+  return (
+    <Configurator
+      defaults={defaultConfig}
+      maxHorizonDays={MAX_HORIZON_DAYS}
+      retentionDays={RETENTION_DAYS}
+    />
+  )
 }

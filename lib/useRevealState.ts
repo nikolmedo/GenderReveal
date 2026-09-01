@@ -13,6 +13,7 @@ export type RevealState = {
   gender: Gender | null
   correct: number
   copy: RevealCopy | null
+  tint: [string, string, string] | null
 }
 
 type Payload = {
@@ -23,13 +24,14 @@ type Payload = {
   gender?: Gender
   correct?: number
   copy?: RevealCopy
+  tint?: [string, string, string]
 }
 
 const IDLE_POLL_MS = 8_000
 const UNLOCK_POLL_MS = 1_200
 const TICK_MS = 200
 
-export function useRevealState(revealAt: number, serverNow: number) {
+export function useRevealState(hash: string, revealAt: number, serverNow: number) {
   const [state, setState] = useState<RevealState>({
     ready: false,
     offline: false,
@@ -40,6 +42,7 @@ export function useRevealState(revealAt: number, serverNow: number) {
     gender: null,
     correct: 0,
     copy: null,
+    tint: null,
   })
 
   /**
@@ -51,7 +54,7 @@ export function useRevealState(revealAt: number, serverNow: number) {
 
   const sync = useCallback(async () => {
     try {
-      const response = await fetch('/api/state', { cache: 'no-store' })
+      const response = await fetch(`/api/reveals/${hash}/state`, { cache: 'no-store' })
       if (!response.ok) throw new Error(String(response.status))
 
       const data: Payload = await response.json()
@@ -66,11 +69,12 @@ export function useRevealState(revealAt: number, serverNow: number) {
         gender: data.gender ?? null,
         correct: data.correct ?? 0,
         copy: data.copy ?? null,
+        tint: data.tint ?? null,
       }))
     } catch {
       setState((previous) => ({ ...previous, ready: true, offline: true }))
     }
-  }, [])
+  }, [hash])
 
   // Countdown ticker, driven by the corrected clock.
   useEffect(() => {

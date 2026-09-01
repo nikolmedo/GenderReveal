@@ -15,13 +15,21 @@
   --ink-soft: rgba(70, 50, 92, 0.6);
   --ink-faint: rgba(70, 50, 92, 0.14);
 
-  --rose: #ff6f9c;
-  --rose-deep: #e34a7b;
-  --rose-pale: #ffdfea;
+  /* Defaults only. Every reveal page overrides these inline with the palette
+     its creator chose, derived server-side from two hex colours. */
+  --girl: #ff6f9c;
+  --girl-light: #ffa1bf;
+  --girl-deep: #d15b80;
+  --girl-pale: #ffdfea;
 
-  --sky: #4fb3f0;
-  --sky-deep: #2589cf;
-  --sky-pale: #d8eefd;
+  --boy: #4fb3f0;
+  --boy-light: #94d0f6;
+  --boy-deep: #4193c5;
+  --boy-pale: #d8eefd;
+
+  --tint-1: #ffe2eb;
+  --tint-2: #ffeef4;
+  --tint-3: #fff9fb;
 
   --sun: #ffc94d;
   --sun-deep: #e8a516;
@@ -89,7 +97,7 @@ p {
     radial-gradient(circle at 42% 62%, rgba(255, 255, 255, 0.7) 0 5px, transparent 6px),
     radial-gradient(circle at 88% 74%, rgba(255, 255, 255, 0.75) 0 5px, transparent 6px),
     radial-gradient(circle at 24% 88%, rgba(255, 255, 255, 0.65) 0 4px, transparent 5px),
-    radial-gradient(140% 90% at 50% -10%, #ffd3e3 0%, #ffe4ee 45%, #fff3f7 100%);
+    radial-gradient(140% 90% at 50% -10%, var(--tint-1) 0%, var(--tint-2) 45%, var(--tint-3) 100%);
   animation: tint 1400ms ease both;
 }
 
@@ -100,7 +108,7 @@ p {
     radial-gradient(circle at 42% 62%, rgba(255, 255, 255, 0.7) 0 5px, transparent 6px),
     radial-gradient(circle at 88% 74%, rgba(255, 255, 255, 0.75) 0 5px, transparent 6px),
     radial-gradient(circle at 24% 88%, rgba(255, 255, 255, 0.65) 0 4px, transparent 5px),
-    radial-gradient(140% 90% at 50% -10%, #c9e8fd 0%, #ddf1fe 45%, #f2faff 100%);
+    radial-gradient(140% 90% at 50% -10%, var(--tint-1) 0%, var(--tint-2) 45%, var(--tint-3) 100%);
   animation: tint 1400ms ease both;
 }
 
@@ -186,19 +194,19 @@ p {
 }
 
 .balloon--girl {
-  color: var(--rose-deep);
+  color: var(--girl-deep);
 }
 
 .balloon--girl .balloon__body {
-  background: radial-gradient(circle at 32% 26%, #ffa6c4 0%, var(--rose) 52%, var(--rose-deep) 100%);
+  background: radial-gradient(circle at 32% 26%, var(--girl-light) 0%, var(--girl) 52%, var(--girl-deep) 100%);
 }
 
 .balloon--boy {
-  color: var(--sky-deep);
+  color: var(--boy-deep);
 }
 
 .balloon--boy .balloon__body {
-  background: radial-gradient(circle at 32% 26%, #9ad4f9 0%, var(--sky) 52%, var(--sky-deep) 100%);
+  background: radial-gradient(circle at 32% 26%, var(--boy-light) 0%, var(--boy) 52%, var(--boy-deep) 100%);
 }
 
 /* The losing colour bursts where it floats, staggered so it reads as a ripple
@@ -367,15 +375,15 @@ p {
 .card:nth-child(even) { rotate: 2deg; }
 
 .card--girl {
-  border-color: var(--rose);
-  background: var(--rose-pale);
-  box-shadow: 0 5px 0 var(--rose);
+  border-color: var(--girl);
+  background: var(--girl-pale);
+  box-shadow: 0 5px 0 var(--girl);
 }
 
 .card--boy {
-  border-color: var(--sky);
-  background: var(--sky-pale);
-  box-shadow: 0 5px 0 var(--sky);
+  border-color: var(--boy);
+  background: var(--boy-pale);
+  box-shadow: 0 5px 0 var(--boy);
 }
 
 .card__digits {
@@ -474,13 +482,13 @@ p {
 }
 
 .choice--girl {
-  border-color: var(--rose);
-  box-shadow: 0 4px 0 var(--rose);
+  border-color: var(--girl);
+  box-shadow: 0 4px 0 var(--girl);
 }
 
 .choice--boy {
-  border-color: var(--sky);
-  box-shadow: 0 4px 0 var(--sky);
+  border-color: var(--boy);
+  box-shadow: 0 4px 0 var(--boy);
 }
 
 .choice:hover {
@@ -493,13 +501,13 @@ p {
 }
 
 .choice--girl.choice--picked {
-  background: var(--rose);
-  box-shadow: 0 2px 0 var(--rose-deep);
+  background: var(--girl);
+  box-shadow: 0 2px 0 var(--girl-deep);
 }
 
 .choice--boy.choice--picked {
-  background: var(--sky);
-  box-shadow: 0 2px 0 var(--sky-deep);
+  background: var(--boy);
+  box-shadow: 0 2px 0 var(--boy-deep);
 }
 
 .ballot__field {
@@ -574,7 +582,7 @@ p {
 .ballot__error {
   font-size: 0.88rem;
   font-weight: 700;
-  color: var(--rose-deep);
+  color: var(--girl-deep);
   text-align: center;
 }
 
@@ -611,8 +619,8 @@ p {
   transition: width 700ms var(--ease-out);
 }
 
-.tally__fill--girl { background: var(--rose); }
-.tally__fill--boy  { background: var(--sky); }
+.tally__fill--girl { background: var(--girl); }
+.tally__fill--boy  { background: var(--boy); }
 
 .tally__legend {
   display: flex;
@@ -636,8 +644,8 @@ p {
   color: var(--ink-soft);
 }
 
-.ink--girl { color: var(--rose-deep); }
-.ink--boy  { color: var(--sky-deep); }
+.ink--girl { color: var(--girl-deep); }
+.ink--boy  { color: var(--boy-deep); }
 
 /* ── Outro ───────────────────────────────────────────────────────────────── */
 
@@ -686,13 +694,13 @@ p {
 }
 
 .reveal--girl .reveal__headline {
-  color: var(--rose-deep);
-  box-shadow: 0 4px 0 var(--rose);
+  color: var(--girl-deep);
+  box-shadow: 0 4px 0 var(--girl);
 }
 
 .reveal--boy .reveal__headline {
-  color: var(--sky-deep);
-  box-shadow: 0 4px 0 var(--sky);
+  color: var(--boy-deep);
+  box-shadow: 0 4px 0 var(--boy);
 }
 
 .reveal__word {
@@ -707,11 +715,11 @@ p {
 }
 
 .reveal--girl .reveal__word {
-  text-shadow: 0 5px 0 var(--rose-deep), 0 14px 26px rgba(227, 74, 123, 0.28);
+  text-shadow: 0 5px 0 var(--girl-deep), 0 14px 26px rgba(0, 0, 0, 0.14);
 }
 
 .reveal--boy .reveal__word {
-  text-shadow: 0 5px 0 var(--sky-deep), 0 14px 26px rgba(37, 137, 207, 0.28);
+  text-shadow: 0 5px 0 var(--boy-deep), 0 14px 26px rgba(0, 0, 0, 0.14);
 }
 
 @keyframes land {
@@ -739,8 +747,8 @@ p {
   transition: opacity 600ms var(--bounce), transform 600ms var(--bounce);
 }
 
-.reveal--girl .verdict { box-shadow: 0 6px 0 var(--rose); }
-.reveal--boy .verdict  { box-shadow: 0 6px 0 var(--sky); }
+.reveal--girl .verdict { box-shadow: 0 6px 0 var(--girl); }
+.reveal--boy .verdict  { box-shadow: 0 6px 0 var(--boy); }
 
 .reveal[data-act="1"] .verdict,
 .reveal[data-act="2"] .verdict {
@@ -817,15 +825,15 @@ p {
   border-radius: 50%;
 }
 
-.confetti--girl .confetti__piece--t0 { background: #e34a7b; }
-.confetti--girl .confetti__piece--t1 { background: #ff6f9c; }
-.confetti--girl .confetti__piece--t2 { background: #ffb3cc; }
-.confetti--girl .confetti__piece--t3 { background: #fff0f5; }
+.confetti--girl .confetti__piece--t0 { background: var(--girl-deep); }
+.confetti--girl .confetti__piece--t1 { background: var(--girl); }
+.confetti--girl .confetti__piece--t2 { background: var(--girl-light); }
+.confetti--girl .confetti__piece--t3 { background: var(--girl-pale); }
 
-.confetti--boy .confetti__piece--t0 { background: #2589cf; }
-.confetti--boy .confetti__piece--t1 { background: #4fb3f0; }
-.confetti--boy .confetti__piece--t2 { background: #9ad4f9; }
-.confetti--boy .confetti__piece--t3 { background: #f0f8ff; }
+.confetti--boy .confetti__piece--t0 { background: var(--boy-deep); }
+.confetti--boy .confetti__piece--t1 { background: var(--boy); }
+.confetti--boy .confetti__piece--t2 { background: var(--boy-light); }
+.confetti--boy .confetti__piece--t3 { background: var(--boy-pale); }
 
 @keyframes fall {
   from {
@@ -876,5 +884,505 @@ p {
   .card__label {
     font-size: 0.52rem;
     letter-spacing: 0.08em;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   The forge — where a countdown gets made.
+
+   Same paper and same fat rounded type as the party, turned down: this is a
+   form, and the only celebration on it is the pair of balloons that previews
+   whatever two colours the creator picks.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.forge {
+  min-height: 100dvh;
+  padding: clamp(1.5rem, 5vw, 3.5rem) 1.1rem clamp(3rem, 8vw, 5rem);
+  background:
+    radial-gradient(circle at 14% 12%, rgba(255, 255, 255, 0.8) 0 5px, transparent 6px),
+    radial-gradient(circle at 82% 30%, rgba(255, 255, 255, 0.7) 0 4px, transparent 5px),
+    radial-gradient(circle at 38% 78%, rgba(255, 255, 255, 0.7) 0 5px, transparent 6px),
+    radial-gradient(150% 80% at 50% -14%, #ffeed9 0%, var(--cream) 55%, #fffaf2 100%);
+  background-size: 280px 280px, 320px 320px, 300px 300px, cover;
+  background-attachment: fixed;
+}
+
+.forge--done {
+  display: grid;
+  place-items: center;
+}
+
+.forge__form,
+.forge__done {
+  width: 100%;
+  max-width: 36rem;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.forge__done {
+  text-align: center;
+  gap: 1rem;
+}
+
+.forge__header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.forge__eyebrow {
+  align-self: center;
+  padding: 0.3rem 0.95rem;
+  border-radius: 999px;
+  background: var(--sun);
+  color: #6a4a00;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  rotate: -2deg;
+  box-shadow: 0 3px 0 var(--sun-deep);
+}
+
+.forge__title {
+  font-family: var(--font-display), ui-rounded, system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.9rem, 6.5vw, 2.7rem);
+  line-height: 1.06;
+  text-wrap: balance;
+}
+
+.forge__lead {
+  color: var(--ink-soft);
+  font-size: 0.97rem;
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+/* ── Blocks ──────────────────────────────────────────────────────────────── */
+
+.block {
+  padding: clamp(1rem, 3.5vw, 1.5rem);
+  border: 3px solid var(--ink-faint);
+  border-radius: 26px;
+  background: var(--paper);
+  box-shadow: 0 7px 0 rgba(70, 50, 92, 0.09);
+}
+
+.block__title {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display), ui-rounded, system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.block--fold > .block__title {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.block--fold > .block__title::-webkit-details-marker {
+  display: none;
+}
+
+.block--fold > .block__title::before {
+  content: "+";
+  color: var(--sun-deep);
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.block--fold[open] > .block__title::before {
+  content: "–";
+}
+
+.block--fold[open] > .block__title {
+  margin-bottom: 0.9rem;
+}
+
+.block__hint {
+  margin-bottom: 0.9rem;
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+/* ── Gender pick ─────────────────────────────────────────────────────────── */
+
+.pick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+}
+
+.pick__option {
+  appearance: none;
+  cursor: pointer;
+  padding: 0.95rem 0.5rem;
+  border: 3px solid var(--tone);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-display), ui-rounded, system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  box-shadow: 0 4px 0 var(--tone);
+  transition: transform 180ms var(--bounce), background 200ms ease, color 200ms ease;
+}
+
+.pick__option:hover {
+  transform: translateY(-3px);
+}
+
+.pick__option--on {
+  background: var(--tone);
+  color: #fff;
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--tone-deep);
+}
+
+/* ── Fields ──────────────────────────────────────────────────────────────── */
+
+.when,
+.fields,
+.tones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.field--wide {
+  grid-column: 1 / -1;
+}
+
+.field > span {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding-left: 0.75rem;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 3px solid var(--ink-faint);
+  border-radius: 18px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  transition: border-color 180ms ease;
+}
+
+.field input[type="date"],
+.field input[type="time"] {
+  border-radius: 999px;
+}
+
+.field textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--sun);
+}
+
+.when__preview {
+  grid-column: 1 / -1;
+  margin-top: 0.9rem;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  background: var(--sun);
+  color: #6a4a00;
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.when__preview--bad {
+  background: var(--girl-pale);
+  color: var(--girl-deep);
+}
+
+/* ── Colour picking ──────────────────────────────────────────────────────── */
+
+.tone {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border: 3px solid var(--ink-faint);
+  border-radius: 18px;
+  cursor: pointer;
+}
+
+.tone input[type="color"] {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.tone input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.tone input[type="color"]::-webkit-color-swatch { border: 2px solid var(--ink-faint); border-radius: 50%; }
+.tone input[type="color"]::-moz-color-swatch { border: 2px solid var(--ink-faint); border-radius: 50%; }
+
+.tone__name {
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.tone__hex {
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
+
+.sample {
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
+  margin-top: 1.2rem;
+  padding-top: 1.2rem;
+  border-top: 3px dotted var(--ink-faint);
+}
+
+.sample__balloon {
+  display: block;
+  width: 58px;
+  height: 70px;
+  border-radius: 50% 50% 47% 47% / 45% 45% 62% 62%;
+}
+
+.sample__balloon--girl {
+  background: radial-gradient(circle at 32% 26%, var(--girl-light) 0%, var(--girl) 52%, var(--girl-deep) 100%);
+}
+
+.sample__balloon--boy {
+  background: radial-gradient(circle at 32% 26%, var(--boy-light) 0%, var(--boy) 52%, var(--boy-deep) 100%);
+}
+
+/* ── Submit and result ───────────────────────────────────────────────────── */
+
+.forge__submit {
+  appearance: none;
+  cursor: pointer;
+  padding: 1.05rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--sun);
+  color: #6a4a00;
+  font-family: var(--font-display), ui-rounded, system-ui, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  box-shadow: 0 5px 0 var(--sun-deep);
+  transition: transform 180ms var(--bounce), opacity 200ms ease;
+}
+
+.forge__submit:hover:not(:disabled) {
+  transform: translateY(-3px);
+}
+
+.forge__submit:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 var(--sun-deep);
+}
+
+.forge__submit:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: 0 5px 0 rgba(70, 50, 92, 0.15);
+}
+
+.forge__error {
+  padding: 0.8rem 1rem;
+  border-radius: 18px;
+  background: var(--girl-pale);
+  color: var(--girl-deep);
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.forge__fine {
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.link {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.link input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.8rem 1rem;
+  border: 3px solid var(--ink-faint);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.link button {
+  appearance: none;
+  cursor: pointer;
+  padding: 0 1.2rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.forge__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.forge__go,
+.forge__again {
+  appearance: none;
+  cursor: pointer;
+  padding: 0.85rem 1.5rem;
+  border-radius: 999px;
+  border: 3px solid var(--girl);
+  background: var(--girl);
+  color: #fff;
+  font-family: var(--font-display), ui-rounded, system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 4px 0 var(--girl-deep);
+}
+
+.forge__again {
+  background: transparent;
+  border-color: var(--ink-faint);
+  color: var(--ink);
+  box-shadow: 0 4px 0 var(--ink-faint);
+}
+
+.mine {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mine li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.55rem 0.9rem;
+  border: 3px solid var(--ink-faint);
+  border-radius: 18px;
+}
+
+.mine a {
+  color: var(--ink);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.mine code {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+/* ── Missing reveal ──────────────────────────────────────────────────────── */
+
+.missing {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: var(--cream);
+}
+
+.missing__card {
+  max-width: 26rem;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border: 3px solid var(--ink-faint);
+  border-radius: 26px;
+  background: var(--paper);
+  box-shadow: 0 7px 0 rgba(70, 50, 92, 0.09);
+}
+
+.missing__card h1 {
+  font-family: var(--font-display), ui-rounded, system-ui, sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 0.7rem;
+}
+
+.missing__card p {
+  color: var(--ink-soft);
+  font-weight: 600;
+  margin-bottom: 1.3rem;
+  text-wrap: balance;
+}
+
+.missing__link {
+  display: inline-block;
+  padding: 0.8rem 1.4rem;
+  border-radius: 999px;
+  background: var(--sun);
+  color: #6a4a00;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 4px 0 var(--sun-deep);
+}
+
+@media (max-width: 520px) {
+  .fields,
+  .when,
+  .tones {
+    grid-template-columns: 1fr;
   }
 }

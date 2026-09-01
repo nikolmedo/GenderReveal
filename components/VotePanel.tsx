@@ -6,6 +6,7 @@ import type { MyVote } from '@/lib/myVote'
 import type { Tally } from '@/lib/store/types'
 
 type Props = {
+  hash: string
   copy: CountdownCopy
   counts: Tally
   myVote: MyVote | null
@@ -15,7 +16,7 @@ type Props = {
   onCounts: (counts: Tally) => void
 }
 
-export function VotePanel({ copy, counts, myVote, voteLoaded, closed, onSaved, onCounts }: Props) {
+export function VotePanel({ hash, copy, counts, myVote, voteLoaded, closed, onSaved, onCounts }: Props) {
   const [name, setName] = useState('')
   const [choice, setChoice] = useState<Gender | null>(null)
   const [sending, setSending] = useState(false)
@@ -32,7 +33,7 @@ export function VotePanel({ copy, counts, myVote, voteLoaded, closed, onSaved, o
     const pending = onSaved(trimmed, choice)
 
     try {
-      const response = await fetch('/api/vote', {
+      const response = await fetch(`/api/reveals/${hash}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(pending),

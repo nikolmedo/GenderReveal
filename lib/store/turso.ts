@@ -1,6 +1,18 @@
 import { createClient, type Client } from '@libsql/client/web'
 import type { Gender } from '@/lib/messages'
-import { emptyTally, SCHEMA, UPSERT, type Tally, type VoteStore } from '@/lib/store/types'
+import {
+  COUNT_MATCHING,
+  emptyTally,
+  INSERT_REVEAL,
+  PURGE_REVEALS,
+  PURGE_VOTES,
+  SCHEMA,
+  SELECT_REVEAL,
+  TALLY,
+  UPSERT_VOTE,
+  type RevealRow,
+  type RevealStore,
+} from '@/lib/store/types'
 
 /**
  * Production adapter.
@@ -9,26 +21,58 @@ import { emptyTally, SCHEMA, UPSERT, type Tally, type VoteStore } from '@/lib/st
  * binding, which is the only shape that survives a serverless function — and
  * the only one that builds on every architecture.
  */
-export function tursoStore(url: string, authToken?: string): VoteStore {
+export function tursoStore(url: string, authToken?: string): RevealStore {
   let client: Client | null = null
   let ready: Promise<void> | null = null
 
   async function connect(): Promise<Client> {
     client ??= createClient({ url, authToken })
-    ready ??= client.execute(SCHEMA).then(() => undefined)
+    ready ??= (async () => {
+      for (const statement of SCHEMA) await client!.execute(statement)
+    })()
     await ready
     return client
   }
 
   return {
-    async cast(voterId, name, choice) {
+    async createReveal(row) {
       const db = await connect()
-      await db.execute({ sql: UPSERT, args: [voterId, name, choice, Date.now()] })
+      await db.execute({
+        sql: INSERT_REVEAL,
+        args: [row.hash, row.gender, row.revealAt, row.expiresAt, row.config, Date.now()],
+      })
     },
 
-    async tally() {
+    async getReveal(hash) {
       const db = await connect()
-      const result = await db.execute('SELECT choice, COUNT(*) AS n FROM votes GROUP BY choice')
+      const result = await db.execute({ sql: SELECT_REVEAL, args: [hash] })
+      const row = result.rows[0]
+      if (!row) return null
+
+      return {
+        hash: String(row.hash),
+        gender: row.gender as Gender,
+        revealAt: Number(row.reveal_at),
+        expiresAt: Number(row.expires_at),
+        config: String(row.config),
+      }
+    },
+
+    async purgeExpired(now) {
+      const db = await connect()
+      await db.execute({ sql: PURGE_VOTES, args: [now] })
+      const result = await db.execute({ sql: PURGE_REVEALS, args: [now] })
+      return result.rowsAffected ?? 0
+    },
+
+    async cast(hash, voterId, name, choice) {
+      const db = await connect()
+      await db.execute({ sql: UPSERT_VOTE, args: [hash, voterId, name, choice, Date.now()] })
+    },
+
+    async tally(hash) {
+      const db = await connect()
+      const result = await db.execute({ sql: TALLY, args: [hash] })
       const counts = emptyTally()
 
       for (const row of result.rows) {
@@ -37,16 +81,15 @@ export function tursoStore(url: string, authToken?: string): VoteStore {
         counts.total += n
       }
 
-      return counts satisfies Tally
+      return counts
     },
 
-    async countMatching(gender) {
+    async countMatching(hash, gender) {
       const db = await connect()
-      const result = await db.execute({
-        sql: 'SELECT COUNT(*) AS n FROM votes WHERE choice = ?',
-        args: [gender],
-      })
+      const result = await db.execute({ sql: COUNT_MATCHING, args: [hash, gender] })
       return Number(result.rows[0]?.n ?? 0)
     },
   }
 }
+
+export type { RevealRow }

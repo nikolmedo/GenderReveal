@@ -10,6 +10,7 @@ import {
 } from '@/lib/messages'
 import { derivePalette, paletteVars } from '@/lib/palette'
 import { resolveInstant } from '@/lib/time'
+import { TimeZonePicker } from '@/components/TimeZonePicker'
 
 type Copy = Record<string, string>
 
@@ -118,7 +119,6 @@ export function Configurator({
   const [date, setDate] = useState('')
   const [time, setTime] = useState('20:00')
   const [timeZone, setTimeZone] = useState('')
-  const [zones, setZones] = useState<string[]>([])
   const [colors, setColors] = useState(defaults.colors)
   const [countdown, setCountdown] = useState<Copy>({ ...defaults.countdown })
   const [reveal, setReveal] = useState<Copy>({ ...defaults.reveal })
@@ -133,14 +133,7 @@ export function Configurator({
   // Everything clock- and locale-dependent is filled in after mount, so the
   // server's markup and the client's first render stay identical.
   useEffect(() => {
-    const resolved = Intl.DateTimeFormat().resolvedOptions().timeZone
-    setTimeZone(resolved)
-
-    try {
-      setZones(Intl.supportedValuesOf('timeZone'))
-    } catch {
-      setZones([resolved])
-    }
+    setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone)
 
     const week = new Date(Date.now() + 7 * 86_400_000)
     const pad = (n: number) => String(n).padStart(2, '0')
@@ -313,20 +306,9 @@ export function Configurator({
               <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
             </label>
 
-            <label className="field field--wide">
-              <span>Zona horaria</span>
-              <input
-                list="timezones"
-                value={timeZone}
-                onChange={(e) => setTimeZone(e.target.value)}
-                required
-              />
-              <datalist id="timezones">
-                {zones.map((zone) => (
-                  <option key={zone} value={zone} />
-                ))}
-              </datalist>
-            </label>
+            <div className="field field--wide">
+              <TimeZonePicker value={timeZone} onChange={setTimeZone} label="Zona horaria" />
+            </div>
           </div>
 
           {horizonMs !== null && (

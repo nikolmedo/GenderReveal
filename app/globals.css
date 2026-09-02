@@ -1427,3 +1427,183 @@ p {
     grid-template-columns: 1fr;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Timezone picker.
+
+   A native <datalist> cannot be styled at all: the popup belongs to the
+   browser, arrives in whatever colours the OS feels like, and only opens on
+   some of the gestures people try. This is the same control, built out of
+   elements this stylesheet can actually reach.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.zone__label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding-left: 0.75rem;
+}
+
+.zone__control {
+  display: flex;
+  align-items: center;
+  border: 3px solid var(--ink-faint);
+  border-radius: 18px;
+  background: #fff;
+  transition: border-color 180ms ease;
+}
+
+.zone__control:focus-within,
+.zone__control--open {
+  border-color: var(--sun);
+}
+
+.zone__control input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.7rem 0.3rem 0.7rem 0.9rem;
+  border: none;
+  border-radius: 18px 0 0 18px;
+  background: none;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.zone__control input:focus {
+  outline: none;
+}
+
+.zone__control input::placeholder {
+  color: rgba(70, 50, 92, 0.32);
+  font-weight: 600;
+}
+
+.zone__toggle {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  align-self: stretch;
+  padding: 0;
+  border: none;
+  border-radius: 0 15px 15px 0;
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.zone__toggle svg {
+  width: 13px;
+  transition: transform 200ms var(--bounce);
+}
+
+.zone__control--open .zone__toggle svg {
+  transform: rotate(180deg);
+}
+
+.zone__toggle:hover {
+  color: var(--sun-deep);
+}
+
+/* ── The list ────────────────────────────────────────────────────────────── */
+
+.zone__list {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  right: 0;
+  max-height: 18rem;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 3px solid var(--ink-faint);
+  border-radius: 20px;
+  background: var(--paper);
+  box-shadow: 0 10px 0 rgba(70, 50, 92, 0.07), 0 18px 40px rgba(70, 50, 92, 0.16);
+  animation: zone-drop 180ms var(--bounce);
+}
+
+@keyframes zone-drop {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.zone__option {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: none;
+  border-radius: 14px;
+  background: none;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.zone__option[data-active='true'] {
+  background: var(--sun);
+  color: #6a4a00;
+}
+
+.zone__option--picked {
+  box-shadow: inset 0 0 0 2px var(--sun);
+}
+
+.zone__city {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zone__region {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.zone__option[data-active='true'] .zone__region {
+  color: rgba(106, 74, 0, 0.72);
+}
+
+.zone__offset {
+  min-width: 4.4rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.zone__option[data-active='true'] .zone__offset {
+  color: rgba(106, 74, 0, 0.85);
+}
+
+.zone__empty {
+  padding: 0.9rem 0.75rem;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-align: center;
+}

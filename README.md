@@ -20,6 +20,9 @@ business. The whole thing fits on Vercel's free plan.
 Before, everybody guesses. Pink and blue in equal number, on purpose: nothing on
 that screen leans either way, because the screen doesn't know either.
 
+The running tally stays hidden until you have voted, so nobody gets nudged by
+whichever way the room is already leaning.
+
 After, half the balloons pop where they float and the confetti comes down in
 whichever colour won.
 

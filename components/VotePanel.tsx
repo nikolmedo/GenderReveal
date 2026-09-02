@@ -106,7 +106,9 @@ export function VotePanel({ hash, copy, counts, myVote, voteLoaded, closed, onSa
         </form>
       )}
 
-      <TallyBar counts={counts} copy={copy} />
+      {/* The tally is hidden until this visitor has committed to a guess, so
+          nobody is nudged by which way the room is already leaning. */}
+      {myVote && <TallyBar counts={counts} copy={copy} />}
     </section>
   )
 }

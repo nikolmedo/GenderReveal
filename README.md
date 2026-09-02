@@ -233,23 +233,6 @@ Do a dress rehearsal. Make a throwaway countdown two minutes out and watch it
 fire. It costs nothing and it's the only way to see the real thing before the
 real thing.
 
-## 🙈 Honest caveats
-
-**Turso has never actually run.** Every test so far went through the local
-`node:sqlite` adapter. Same port, same SQL, but the production store has not
-executed once. Your two-minute dress rehearsal on a preview deploy is its first
-real outing, which is the main reason to do it.
-
-**No rate limiting.** Anyone who reaches the site can create a countdown.
-Payload size and every field are capped, which is the right amount of armour
-for something this size. If the URL travels further than you meant it to,
-that's the thing to add.
-
-**Polling, not websockets.** Every open tab asks for the state every 8 seconds,
-and every 1.2 seconds in the last stretch. Fifty guests over two hours is about
-45k function calls against a 1M monthly allowance. Vercel's free plan has
-nowhere to hold a socket open and a family-sized guest list doesn't need one.
-
 ## 🎈 Why did the balloon go near the needle?
 
 It wanted to be popular.

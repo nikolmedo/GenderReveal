@@ -133,10 +133,12 @@ function Floater({
         } as React.CSSProperties
       }
     >
-      <span className="balloon__body">
-        <span className="balloon__shine" />
+      <span className="balloon__sway">
+        <span className="balloon__body">
+          <span className="balloon__shine" />
+        </span>
+        <span className="balloon__string" />
       </span>
-      <span className="balloon__string" />
     </span>
   )
 }

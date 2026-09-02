@@ -10,10 +10,22 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <Configurator
-      defaults={defaultConfig}
-      maxHorizonDays={MAX_HORIZON_DAYS}
-      retentionDays={RETENTION_DAYS}
-    />
+    // The credit lives here rather than inside the Configurator so it cannot
+    // reach a countdown page: /r/[hash] is a different route and never renders
+    // this tree. A guest's screen belongs to whoever threw the party.
+    <div className="home">
+      <Configurator
+        defaults={defaultConfig}
+        maxHorizonDays={MAX_HORIZON_DAYS}
+        retentionDays={RETENTION_DAYS}
+      />
+
+      <footer className="credit">
+        Desarrollado por{' '}
+        <a href="https://nolmedo.dev/" target="_blank" rel="noopener noreferrer">
+          Nico Olmedo
+        </a>
+      </footer>
+    </div>
   )
 }

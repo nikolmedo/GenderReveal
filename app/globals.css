@@ -140,13 +140,22 @@ p {
   to   { transform: translateY(-155vh); }
 }
 
+/* The balloon and its string sway as one piece.
+   The sway used to sit on the body alone, and since the string is its sibling
+   rather than its child, the body drifted off and left the string hanging in
+   mid-air. Anything that must move together belongs in the same transform. */
+.balloon__sway {
+  display: block;
+  transform-origin: 50% 40%;
+  animation: sway 4.5s ease-in-out infinite alternate;
+}
+
 .balloon__body {
   position: relative;
   display: block;
   width: 100%;
   aspect-ratio: 5 / 6;
   border-radius: 50% 50% 47% 47% / 45% 45% 62% 62%;
-  animation: sway 4.5s ease-in-out infinite alternate;
 }
 
 @keyframes sway {
@@ -179,11 +188,14 @@ p {
   filter: blur(3px);
 }
 
+/* The curve hangs off the right edge of this box, so that edge has to land on
+   the knot at 50%. It used to start at 73% and the string grew out of the
+   balloon's flank. */
 .balloon__string {
   display: block;
   width: 46%;
   height: 62px;
-  margin-left: 27%;
+  margin-left: 4%;
   border-right: 2px solid rgba(70, 50, 92, 0.2);
   border-bottom: 2px solid rgba(70, 50, 92, 0.2);
   border-radius: 0 0 70% 0;
@@ -211,7 +223,8 @@ p {
 
 /* The losing colour bursts where it floats, staggered so it reads as a ripple
    rather than every balloon vanishing on the same frame. */
-.balloon--popping {
+.balloon--popping,
+.balloon--popping .balloon__sway {
   animation-play-state: paused;
 }
 
@@ -871,7 +884,7 @@ p {
     top: var(--rest);
   }
 
-  .balloon__body {
+  .balloon__sway {
     animation: none !important;
   }
 
@@ -895,9 +908,12 @@ p {
    whatever two colours the creator picks.
    ───────────────────────────────────────────────────────────────────────── */
 
-.forge {
+/* The home page only: the form, then the credit under it. The paper sits on
+   the wrapper so the footer stands on the same sheet as the form. */
+.home {
+  display: flex;
+  flex-direction: column;
   min-height: 100dvh;
-  padding: clamp(1.5rem, 5vw, 3.5rem) 1.1rem clamp(3rem, 8vw, 5rem);
   background:
     radial-gradient(circle at 14% 12%, rgba(255, 255, 255, 0.8) 0 5px, transparent 6px),
     radial-gradient(circle at 82% 30%, rgba(255, 255, 255, 0.7) 0 4px, transparent 5px),
@@ -905,6 +921,31 @@ p {
     radial-gradient(150% 80% at 50% -14%, #ffeed9 0%, var(--cream) 55%, #fffaf2 100%);
   background-size: 280px 280px, 320px 320px, 300px 300px, cover;
   background-attachment: fixed;
+}
+
+.forge {
+  flex: 1;
+  padding: clamp(1.5rem, 5vw, 3.5rem) 1.1rem clamp(2rem, 6vw, 3rem);
+}
+
+.credit {
+  padding: 0 1.1rem clamp(1.6rem, 4vw, 2.4rem);
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.credit a {
+  color: var(--ink);
+  text-decoration-color: var(--sun);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 3px;
+  transition: color 180ms ease;
+}
+
+.credit a:hover {
+  color: var(--sun-deep);
 }
 
 .forge--done {

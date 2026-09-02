@@ -1,126 +1,127 @@
 # Gender Reveal
 
-Fill in a form, get a link, send it to everyone you know. When the clock hits
-zero it hits zero for all of them at once — Buenos Aires, Madrid, a plane over
-the Atlantic — and only then does the page say whether it is a girl or a boy.
-Guests guess during the countdown; at zero each one is told whether they got it
-right, and how many people did.
+Fill in a form. Get a link. Send it to everyone you know.
 
-Any number of countdowns can run at the same time, each behind its own link.
-Built to run entirely on Vercel's free Hobby plan.
+When the clock hits zero, it hits zero for all of them at the same time. Buenos
+Aires, Madrid, your cousin on a plane over the Atlantic. Only then does the page
+say whether it's a girl or a boy. Guests guess while the clock runs, and at zero
+each one finds out whether they were right, and how many other people were.
 
----
+Run as many countdowns as you want. Each one gets its own link and minds its own
+business. The whole thing fits on Vercel's free plan.
 
-## How the hard parts actually work
+## The two ways this could ruin your night
 
-**One instant, every timezone.** The creator picks a wall-clock time and a
-timezone. The server collapses that to a single epoch value by asking the zone
-how it reads a candidate instant and correcting — twice, so a correction that
-itself steps over a DST boundary still settles. There is no table of offsets
-anywhere in the codebase, and no DST arithmetic.
+It's a silly app. These two things are not silly, so they got all the attention.
 
-Browsers with a wrong system clock are the real hazard, so the state endpoint
-returns `serverNow` on every call. Each client measures its own drift against
-it and counts down against the corrected time. A laptop set three hours fast
-still hits zero with everybody else.
+### Someone finds out early
 
-**The secret stays on the server.** The gender lives in a database column. So
-does every word of the reveal copy — the whole `reveal` section of a countdown's
-configuration is withheld, and the winning phrase is resolved server-side, so
-the browser is never handed both options to choose from. `/api/reveals/[hash]/state`
-adds `gender`, `correct`, `copy` and the sky tint to its payload only once the
-server's own clock has passed that countdown's moment. Opening DevTools before
-then shows nothing but a countdown. Votes are rejected with `409` after the
-hour, for the same reason.
+The gender lives in a database column and nowhere else. So does every word of
+the reveal copy. Before the hour, `/api/reveals/[hash]/state` returns a
+countdown and some vote counts, and that's it. No gender, no wording, no sky
+colour. Open DevTools and there's nothing to find.
 
-Each countdown closes on **its own** instant. Two can be open at once and shut
-hours apart.
+When the moment does pass, the server picks the winning phrase and sends only
+that one. The browser never holds both options, because holding both means
+holding the answer.
 
-**The palette is derived on the server.** A creator picks two colours; the
-server derives light, deep, pale and three sky-tint shades from each, and the
-page wears all eight as inline custom properties. Not `color-mix` in CSS: a
-custom property substitutes its `var()` references at the element where it is
-*declared*, so tokens derived in `:root` would ignore an override further down
-the tree — and older Safari has no `color-mix` at all.
+Votes stop being accepted at the hour too. Each countdown closes on **its own**
+instant, so two can be open at once and shut hours apart.
 
-Colours are validated as strict `#rrggbb` before they are stored. They are
-written into a `style` attribute, so anything looser than that is a CSS
-injection.
+### The clock is wrong
 
----
+Not your clock. Theirs.
 
-## Rules
+The creator picks a wall-clock time and a timezone, and the server collapses it
+into one moment in history. It does that by asking the zone how it reads a
+candidate instant and correcting, twice, so a correction that trips over a DST
+boundary still lands. There's no table of offsets in this codebase and no DST
+arithmetic. Good, because that's where these things go wrong.
 
-| Rule | Value | Where it is enforced |
+Then there's the guest whose laptop is forty minutes fast. Every response
+carries `serverNow`, each browser measures its own drift against it, and the
+countdown runs on the corrected time. Set your clock three hours ahead and the
+page politely ignores you.
+
+The whole feature is called sync. You cannot wash dishes in it. I checked.
+
+## Colours
+
+Pick two. The server derives light, deep, pale and three sky tints from each,
+and the page wears all eight. Balloons, countdown cards, the tally bar, the
+confetti, the wash of colour at the end. Purple and green if you want. Nobody's
+stopping you.
+
+Two notes for whoever touches this next.
+
+Those shades are derived in JavaScript on the server, not with `color-mix` in
+CSS, and that's deliberate. A CSS custom property substitutes its `var()`
+references at the element where it's *declared*. Derive `--girl-deep` from
+`--girl` up in `:root`, override `--girl` further down the tree, and
+`--girl-deep` keeps the old value and you spend an afternoon confused. Ask me
+how I know. Deriving on the server also means older Safari, which has no
+`color-mix`, gets the same page as everyone else.
+
+And colours are validated as strict `#rrggbb` before anything is stored,
+because they're written into a `style` attribute. A colour field that accepts
+`#fff;background:url(//somewhere-else)` is not a colour field, it's a CSS
+injection with a nice UI.
+
+## The rules
+
+| Rule | Value | What happens |
 | --- | --- | --- |
-| Maximum countdown length | 45 days | Rejected at creation, `horizon_exceeded` |
-| Retention after the reveal | 30 days | `expires_at`, then purged |
-| Reveal in the past | Rejected | `time_in_past` |
+| Longest countdown | 45 days | Rejected at creation, `horizon_exceeded` |
+| Kept after the reveal | 30 days | `expires_at`, then purged |
+| Reveal in the past | Nope | `time_in_past` |
 
-Retention is enforced twice: opportunistically on every creation, and by a
-daily Vercel Cron hitting `/api/cron/purge`. A countdown past its window
-returns 404 the moment it expires, whether or not the sweep has run yet — the
-data is unreachable immediately and deleted shortly after.
+Why 30 days? After a month everybody has moved on. Including the database.
 
----
+Retention runs twice over: opportunistically whenever somebody creates a
+countdown, and by a daily Vercel Cron on `/api/cron/purge`. An expired
+countdown returns 404 from the instant it expires, whether or not the sweep has
+run. Unreachable immediately, deleted shortly after.
 
-## Stack
-
-| Piece | Choice | Why |
-| --- | --- | --- |
-| Framework | Next.js 15 (App Router) | Zero-config on Vercel; ~107 kB first load |
-| Database | Turso (libSQL) | Real SQLite, spoken over HTTP — see below |
-| Storage adapter | Port + two adapters | Turso in production, `node:sqlite` file locally |
-| Styling | Plain CSS | Balloons and confetti are transforms, not a library |
-
-### Why not a plain SQLite file
-
-Because it does not work on Vercel, and failing at the reveal is not an option.
-Serverless functions get an ephemeral, read-only filesystem — only `/tmp` is
-writable, it is per-instance, and it is wiped between invocations. Countdowns
-and votes would vanish, or differ depending on which instance answered.
-
-Turso is the same SQLite, hosted, reachable over HTTP. The free plan is 5 GB,
-500M row reads and 10M row writes per month — several orders of magnitude more
-than this needs. Local development still writes a real `local.db` file through
-Node's built-in `node:sqlite`, so `npm run dev` needs no account and no network.
-
----
-
-## Setup
+## Getting it running
 
 ```bash
 npm install
 npm run dev
 ```
 
-`http://localhost:3000` is the configurator. Create a countdown and it hands
-you a link. Everything lands in `local.db` (gitignored); no account, no
-network, no environment variables needed to develop.
+`http://localhost:3000` is the form. Fill it in, get a link, open it. No
+account, no network, no environment variables. Everything lands in `local.db`,
+which is gitignored.
 
-### Customising the defaults
+### Changing what the form starts with
 
-`content/defaults.json` is what prefills the form: the two colours, every line
-of countdown copy and every line of reveal copy. Change it and the form starts
-from your wording instead. Nothing is hardcoded in a component.
+`content/defaults.json` holds the two colours and every line of copy the app
+will ever show. Edit it and the form starts from your wording. Nothing is
+hardcoded in a component.
 
-Its two sections mirror the security boundary:
+Its two sections are the security boundary, not just organisation:
 
-- `countdown` — the pre-reveal page. Shipped to every browser immediately.
-- `reveal` — the payoff. **Withheld by the server until the hour**, so anything
-  written here is safe from a curious guest.
+- `countdown` ships to every browser immediately.
+- `reveal` is **held on the server until the hour**. Write whatever you want in
+  there. Nobody can peek.
 
-`{name}`, `{correct}` and `{total}` are substituted at render time. Each field
-has its own length limit in `lib/messages.ts`; that table doubles as the
-allow-list, so anything a creator submits that is not named there is dropped
-rather than stored.
+`{name}`, `{correct}` and `{total}` get filled in at render time. Every field
+has a length limit in `lib/messages.ts`, and that table doubles as the
+allow-list: anything submitted that isn't named there gets dropped rather than
+stored.
 
----
+## Putting it on the internet
 
-## Deploying to Vercel
+**1. A database that remembers things.**
 
-**1. Create the Turso database.** Sign up at [turso.tech](https://turso.tech),
-then:
+Vercel's filesystem has commitment issues. Serverless functions get an
+ephemeral, read-only disk, `/tmp` is per-instance and wiped between
+invocations, and votes written there would either vanish or disagree depending
+on which instance answered. That is a fun bug to discover on the night.
+
+Turso is the same SQLite, hosted, reachable over HTTP. Free plan is 5 GB, 500M
+row reads and 10M writes a month, which is roughly a million times what a party
+needs.
 
 ```bash
 turso db create gender-reveal
@@ -128,10 +129,10 @@ turso db show gender-reveal --url          # → TURSO_DATABASE_URL
 turso db tokens create gender-reveal       # → TURSO_AUTH_TOKEN
 ```
 
-The schema creates itself on the first request; there is no migration step.
+The schema builds itself on the first request. No migration step.
 
-**2. Import the repo on Vercel** and add these environment variables under
-*Settings → Environment Variables*:
+**2. Import the repo on Vercel** and add these under *Settings → Environment
+Variables*:
 
 | Name | Required | Value |
 | --- | --- | --- |
@@ -139,72 +140,89 @@ The schema creates itself on the first request; there is no migration step.
 | `TURSO_AUTH_TOKEN` | yes | from step 1 |
 | `CRON_SECRET` | for the daily purge | any long random string |
 
-`vercel.json` registers the daily cron; Vercel sends `CRON_SECRET` as a bearer
-token, and the endpoint refuses anything else.
+`vercel.json` registers the cron. Vercel sends `CRON_SECRET` as a bearer token
+and the endpoint refuses anything else.
 
-**3. Share a link.** No accounts, no install for guests. Reveal pages are
-`noindex`, so a countdown will not turn up in a search while you are waiting.
-
----
+**3. Send the link.** Guests need no account and no app. Reveal pages are
+`noindex`, so Google won't find out before grandma does.
 
 ## Before the day
 
-- [ ] Created the countdown on the deployed site, not on localhost
-- [ ] Opened the link and confirmed the countdown reads what you expect
-- [ ] Set your laptop clock two hours off and confirmed the countdown *does not*
-      follow it — that is the drift correction doing its job
-- [ ] Left a test vote, then cleared `localStorage` before sharing the link
-- [ ] Kept the link somewhere other than the browser that made it
+- [ ] Made the countdown on the deployed site, not on localhost
+- [ ] Opened the link and read it top to bottom
+- [ ] Set your laptop clock two hours off and confirmed the countdown ignored
+      you, which is the drift correction earning its keep
+- [ ] Left a test vote, then cleared `localStorage` before sharing anything
+- [ ] **Saved the link somewhere that isn't this browser**
 
-The configurator remembers what you created in that browser's `localStorage`
-and lists it under the form. That is a convenience, not a backup: there is no
-account and no recovery. **Save the link.**
+That last one is not decoration. The form keeps a list of what you made in
+`localStorage` and shows it under the form, but there's no account and no
+recovery. Clear your browser data and that countdown is gone to you, still
+happily ticking for everyone you sent it to.
 
-To rehearse the whole thing, create a throwaway countdown two minutes out and
-watch it fire. It costs nothing and it is the only way to see the real
-transition before the real one.
+Do a dress rehearsal. Make a throwaway countdown two minutes out and watch it
+fire. It costs nothing and it's the only way to see the real thing before the
+real thing.
 
----
+## Honest caveats
 
-## Load
+**Turso has never actually run.** Every test so far went through the local
+`node:sqlite` adapter. Same port, same SQL, but the production store has not
+executed once. Your two-minute dress rehearsal on a preview deploy is its first
+real outing, which is the main reason to do it.
 
-Each open tab polls the state endpoint every 8 seconds, and every 1.2 seconds
-in the final stretch. Fifty guests for two hours is roughly 45k function
-invocations against Vercel's 1M monthly free allowance, and a rounding error
-against Turso's read budget.
+**No rate limiting.** Anyone who reaches the site can create a countdown.
+Payload size and every field are capped, which is the right amount of armour
+for something this size. If the URL travels further than you meant it to,
+that's the thing to add.
 
-There are no websockets — Vercel's free plan has no place to keep a connection
-open, and a family-sized guest list does not need one.
+**Polling, not websockets.** Every open tab asks for the state every 8 seconds,
+and every 1.2 seconds in the last stretch. Fifty guests over two hours is about
+45k function calls against a 1M monthly allowance. Vercel's free plan has
+nowhere to hold a socket open and a family-sized guest list doesn't need one.
 
-Anyone who can reach the site can create a countdown. Payload size and every
-field are capped, which is the right amount of defence for something this
-size; there is no rate limiting. If it ever gets shared beyond the people you
-meant to share it with, that is the thing to add.
+## Why did the balloon go near the needle?
 
----
+It wanted to be popular.
 
-## Layout
+Speaking of which: the balloons render *above* the countdown/reveal swap, not
+inside either screen. Put them inside and React unmounts them at the switch,
+they restart, and the moment reads as a cut. Outside, zero is one continuous
+event. The losing colour bursts where it floats in a staggered ripple, the
+winning colour carries on and is joined by more, the sky takes its tint, and
+the confetti falls.
+
+The trick that makes "bursts where it floats" work is `animation-play-state:
+paused` on the balloon wrapper. It freezes the rise without touching the burst
+ring on its `::after` or the pop animation on its child. Balloon stops mid-air,
+then goes.
+
+## Where things live
 
 ```
 app/
-  page.tsx                        the configurator
-  r/[hash]/page.tsx               a countdown — hands down its palette, never the answer
+  page.tsx                        the form
+  r/[hash]/page.tsx               a countdown. Hands down its palette, never the answer
   api/reveals/route.ts            POST: validate, derive, store, hand back a link
-  api/reveals/[hash]/state        the single source of truth; releases the secret on time
-  api/reveals/[hash]/vote         accepts guesses, closes at that countdown's hour
-  api/cron/purge                  daily retention sweep
+  api/reveals/[hash]/state        the single source of truth. Opens the envelope on time
+  api/reveals/[hash]/vote         takes guesses, closes at that countdown's hour
+  api/cron/purge                  the daily sweep
 components/
   Configurator.tsx                the form
-  Balloons.tsx                    lives above the countdown/reveal swap, so the moment is continuous
+  Balloons.tsx                    lives above the swap, which is the whole point
   Countdown, VotePanel, Reveal, Confetti
 lib/
   reveals.ts                      validation, hashes, retention, the withheld copy
-  palette.ts                      two colours → the whole theme
-  time.ts                         wall clock + IANA zone → one instant
-  messages.ts                     the copy that is safe to ship, and every field limit
-  useRevealState.ts               clock-drift correction and polling
-  myVote.ts                       the guest's own guess, in localStorage, keyed per countdown
-  store/                          RevealStore port + Turso and local-file adapters
+  palette.ts                      two colours become a whole theme
+  time.ts                         wall clock plus IANA zone becomes one instant
+  messages.ts                     the copy that's safe to ship, and every field limit
+  useRevealState.ts               drift correction and polling
+  myVote.ts                       the guest's own guess, in localStorage, one key per countdown
+  store/                          RevealStore port, Turso and local-file adapters
 content/
   defaults.json                   what the form starts from
 ```
+
+Built with Next.js 15 on the App Router. About 107 kB of JavaScript on first
+load, most of which is React. The balloons and the confetti are CSS transforms,
+not a library.

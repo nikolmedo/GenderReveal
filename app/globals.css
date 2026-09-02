@@ -1924,3 +1924,38 @@ p {
   padding-top: 0;
   border-top: none;
 }
+
+/* ── Language switch ─────────────────────────────────────────────────────── */
+
+.tongues {
+  display: flex;
+  gap: 0.35rem;
+  align-self: center;
+  padding: 0.25rem;
+  border: 3px solid var(--ink-faint);
+  border-radius: 999px;
+  background: var(--paper);
+}
+
+.tongues__pick {
+  appearance: none;
+  cursor: pointer;
+  padding: 0.4rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.tongues__pick:hover {
+  color: var(--ink);
+}
+
+.tongues__pick--on {
+  background: var(--sun);
+  color: #6a4a00;
+}

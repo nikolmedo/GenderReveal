@@ -7,7 +7,15 @@ import { useState } from 'react'
  * itself on focus, and copies on a click, because these get moved to WhatsApp
  * and a mistyped one leads nowhere.
  */
-export function CopyLink({ url, tone = 'share' }: { url: string; tone?: 'share' | 'secret' }) {
+export function CopyLink({
+  url,
+  copy,
+  tone = 'share',
+}: {
+  url: string
+  copy: { copy: string; copied: string }
+  tone?: 'share' | 'secret'
+}) {
   const [copied, setCopied] = useState(false)
 
   return (
@@ -25,7 +33,7 @@ export function CopyLink({ url, tone = 'share' }: { url: string; tone?: 'share' 
           }
         }}
       >
-        {copied ? '¡Copiado!' : 'Copiar'}
+        {copied ? copy.copied : copy.copy}
       </button>
     </div>
   )

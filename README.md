@@ -95,6 +95,27 @@ because they're written into a `style` attribute. A colour field that accepts
 `#fff;background:url(//somewhere-else)` is not a colour field, it's a CSS
 injection with a nice UI.
 
+## 🌍 Two languages
+
+English and Spanish, everywhere. The landing reads `Accept-Language` and greets
+you in whichever of the two fits, English when neither does, and a switch at the
+top overrides that. The choice is remembered in `localStorage`, so it outranks
+the header on the next visit.
+
+A countdown, though, speaks **one** language for its whole life: whichever was
+on screen when the link was made. It goes into the stored config and neither the
+guest's browser nor an edit through the organiser panel can change it. That
+matters, because the link is shared: a guest in Madrid opening an English
+countdown should see the same page the organiser wrote, not a translation of it.
+
+Flipping the switch also swaps the party wording, but only the fields nobody has
+typed into. Anything the creator wrote stays theirs.
+
+`content/copy/en.json` and `content/copy/es.json` hold both catalogues. The
+`Record<Locale, typeof en>` annotation in `lib/i18n.ts` is the check: a key
+missing from one of them fails the build rather than turning up as `undefined`
+on somebody's party page.
+
 ## 📏 The rules
 
 | Rule | Value | What happens |
@@ -102,6 +123,7 @@ injection with a nice UI.
 | ⏱️ Longest countdown | 45 days | Rejected at creation, `horizon_exceeded` |
 | 🗑️ Kept after the reveal | 30 days | `expires_at`, then purged |
 | ⏮️ Reveal in the past | Nope | `time_in_past` |
+| 🌍 Language when unspecified | English | Locked into the link at creation |
 
 Forty-five days is already a long time to keep a secret from your mother.
 
@@ -130,11 +152,13 @@ can ship it without reading a single one. Which is exactly what you'll do.
 
 ### ✏️ Changing what the form starts with
 
-`content/defaults.json` holds the two colours and every line of copy the app
-will ever show. Edit it and the form starts from your wording. Nothing is
-hardcoded in a component.
+`content/copy/en.json` and `content/copy/es.json` hold every line the app will
+ever show, in both languages. `content/defaults.json` keeps what has no language
+at all: the two colours and the two switches. Edit them and the form starts from
+your wording. Nothing is hardcoded in a component.
 
-Its two sections are the security boundary, not just organisation:
+Each catalogue's `countdown` and `reveal` sections are the security boundary,
+not just organisation:
 
 - 👀 `countdown` ships to every browser immediately.
 - 🔒 `reveal` is **held on the server until the hour**. Write whatever you want
@@ -257,6 +281,7 @@ components/
   Balloons.tsx                    lives above the swap, which is the whole point
   Countdown, VotePanel, Reveal, Confetti
 lib/
+  i18n.ts                         the two catalogues, and how a request picks one
   reveals.ts                      validation, hashes, retention, the withheld copy
   palette.ts                      two colours become a whole theme
   time.ts                         wall clock plus IANA zone becomes one instant
@@ -265,7 +290,8 @@ lib/
   myVote.ts                       the guest's own guess, in localStorage, one key per countdown
   store/                          RevealStore port, Turso and local-file adapters
 content/
-  defaults.json                   what the form starts from
+  defaults.json                   colours and switches, the parts with no language
+  copy/en.json, copy/es.json      every line the app can say, in both
 docs/img/                         the screenshots above, taken from the running app
 ```
 

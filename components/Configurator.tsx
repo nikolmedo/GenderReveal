@@ -4,31 +4,32 @@ import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from
 import {
   COUNTDOWN_LIMITS,
   REVEAL_LIMITS,
+  fill,
   type CountdownCopy,
   type Gender,
   type RevealTexts,
 } from '@/lib/messages'
+import { copyFor, isLocale, LOCALES, LOCALE_NAMES, type Copy, type Locale } from '@/lib/i18n'
 import { derivePalette, paletteVars } from '@/lib/palette'
 import { resolveInstant } from '@/lib/time'
 import { TimeZonePicker } from '@/components/TimeZonePicker'
 import { CopyLink } from '@/components/CopyLink'
 
-type Copy = Record<string, string>
+type Fields = Record<string, string>
 
 type Defaults = {
   colors: { girl: string; boy: string }
   options: { votingEnabled: boolean; showVoters: boolean }
-  countdown: CountdownCopy
-  reveal: RevealTexts
 }
 
 type Created = { hash: string; url: string; adminUrl: string; title: string; revealAt: number }
 
 export type EditableConfig = {
-  countdown: Copy
-  reveal: Copy
+  countdown: Fields
+  reveal: Fields
   colors: { girl: string; boy: string }
   options: { votingEnabled: boolean; showVoters: boolean }
+  locale: Locale
   timeZone: string
   wallClock: string
 }
@@ -40,58 +41,8 @@ type EditMode = {
 }
 
 const MINE_KEY = 'genderreveal:created:v1'
+const LOCALE_KEY = 'genderreveal:locale:v1'
 const TEXTAREA_FROM = 150
-
-const COUNTDOWN_LABELS: Record<keyof CountdownCopy, string> = {
-  pageTitle: 'Título de la pestaña',
-  eyebrow: 'Etiqueta de arriba',
-  title: 'Título principal',
-  welcome: 'Bienvenida',
-  hostLine: 'Firma del pie',
-  votePrompt: 'Pregunta de la votación',
-  nameLabel: 'Etiqueta del campo nombre',
-  namePlaceholder: 'Texto guía del nombre',
-  voteButton: 'Botón de votar',
-  voteButtonSending: 'Botón mientras guarda',
-  votedConfirmation: 'Confirmación al votar · usa {name}',
-  voteClosedNotice: 'Aviso de votación cerrada',
-  voteErrorNotice: 'Aviso de error al votar',
-  offlineNotice: 'Aviso de sin conexión',
-  tallyTitle: 'Título del conteo',
-  voteSingular: 'Palabra «voto»',
-  votePlural: 'Palabra «votos»',
-  girlLabel: 'Cómo se lee la opción nena',
-  boyLabel: 'Cómo se lee la opción nene',
-  daysLabel: 'Rótulo de días',
-  hoursLabel: 'Rótulo de horas',
-  minutesLabel: 'Rótulo de minutos',
-  secondsLabel: 'Rótulo de segundos',
-}
-
-const REVEAL_LABELS: Record<keyof RevealTexts, string> = {
-  headline: 'Antetítulo',
-  girlText: 'Si es nena, se lee',
-  boyText: 'Si es nene, se lee',
-  subtitle: 'Subtítulo',
-  correct: 'Si acertó · usa {name}',
-  wrong: 'Si erró · usa {name}',
-  noVote: 'Si no llegó a votar',
-  score: 'Marcador · usa {correct} y {total}',
-  votersShow: 'Botón para ver la votación',
-  votersHide: 'Botón para ocultarla',
-  votersEmpty: 'Si no votó nadie',
-  votersMore: 'Si la lista se corta · usa {count}',
-  hostLine: 'Firma del pie',
-}
-
-const ERRORS: Record<string, string> = {
-  invalid_gender: 'Elegí nena o nene.',
-  invalid_time: 'Revisá la fecha, la hora y la zona horaria.',
-  time_in_past: 'Esa hora ya pasó. Elegí un momento futuro.',
-  invalid_color: 'Los colores tienen que ser hexadecimales, tipo #ff6f9c.',
-  invalid_text: 'Alguno de los textos quedó demasiado largo.',
-  invalid_payload: 'No pudimos leer el formulario. Probá de nuevo.',
-}
 
 function loadMine(): Created[] {
   try {
@@ -112,34 +63,58 @@ function remember(entry: Created) {
   }
 }
 
-function countdownText(ms: number): string {
+/**
+ * Swaps the wording of every field the creator has not touched.
+ *
+ * A field still holding the old language's default was never edited, so it
+ * follows the switch. One they typed into is theirs and stays put — otherwise
+ * flipping the language would quietly throw away their writing.
+ */
+function relocalise(current: Fields, from: Fields, to: Fields): Fields {
+  const next: Fields = { ...current }
+
+  for (const key of Object.keys(to)) {
+    if (next[key] === from[key]) next[key] = to[key]
+  }
+
+  return next
+}
+
+function humanGap(ms: number, units: Copy['ui']['units']): string {
   const total = Math.max(0, Math.floor(ms / 1000))
   const days = Math.floor(total / 86400)
   const hours = Math.floor(total / 3600) % 24
   const minutes = Math.floor(total / 60) % 60
 
-  const parts = [
-    days > 0 ? `${days} ${days === 1 ? 'día' : 'días'}` : null,
-    hours > 0 ? `${hours} h` : null,
-    days === 0 ? `${minutes} min` : null,
-  ].filter(Boolean)
-
-  return parts.join(' · ')
+  return [
+    days > 0 ? `${days} ${days === 1 ? units.day : units.days}` : null,
+    hours > 0 ? `${hours} ${units.hour}` : null,
+    days === 0 ? `${minutes} ${units.minute}` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ')
 }
 
 export function Configurator({
   defaults,
   maxHorizonDays,
   retentionDays,
+  initialLocale,
   edit,
 }: {
   defaults: Defaults
   maxHorizonDays: number
   retentionDays: number
+  initialLocale: Locale
   /** Present when the form is rewriting a countdown instead of making one. */
   edit?: EditMode
 }) {
   const [startDate, startTime] = (edit?.config.wallClock ?? '').split('T')
+
+  // A countdown speaks the language it was made in, so editing never offers the
+  // switch; only the landing does.
+  const [locale, setLocale] = useState<Locale>(edit?.config.locale ?? initialLocale)
+  const t = copyFor(locale)
 
   const [gender, setGender] = useState<Gender>('girl')
   const [date, setDate] = useState(startDate ?? '')
@@ -147,8 +122,14 @@ export function Configurator({
   const [timeZone, setTimeZone] = useState(edit?.config.timeZone ?? '')
   const [colors, setColors] = useState(edit?.config.colors ?? defaults.colors)
   const [options, setOptions] = useState(edit?.config.options ?? defaults.options)
-  const [countdown, setCountdown] = useState<Copy>({ ...defaults.countdown, ...edit?.config.countdown })
-  const [reveal, setReveal] = useState<Copy>({ ...defaults.reveal, ...edit?.config.reveal })
+  const [countdown, setCountdown] = useState<Fields>({
+    ...copyFor(edit?.config.locale ?? initialLocale).countdown,
+    ...edit?.config.countdown,
+  })
+  const [reveal, setReveal] = useState<Fields>({
+    ...copyFor(edit?.config.locale ?? initialLocale).reveal,
+    ...edit?.config.reveal,
+  })
 
   const [now, setNow] = useState(0)
   const [sending, setSending] = useState(false)
@@ -166,6 +147,14 @@ export function Configurator({
       const week = new Date(Date.now() + 7 * 86_400_000)
       const pad = (n: number) => String(n).padStart(2, '0')
       setDate(`${week.getFullYear()}-${pad(week.getMonth() + 1)}-${pad(week.getDate())}`)
+
+      // The server guessed from Accept-Language; a previous choice beats it.
+      try {
+        const remembered = localStorage.getItem(LOCALE_KEY)
+        if (isLocale(remembered) && remembered !== locale) switchTo(remembered)
+      } catch {
+        // Nothing remembered, or storage refused. The header's guess stands.
+      }
     }
 
     setMine(loadMine())
@@ -175,6 +164,21 @@ export function Configurator({
     return () => clearInterval(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  function switchTo(next: Locale) {
+    const from = copyFor(locale)
+    const to = copyFor(next)
+
+    setCountdown((current) => relocalise(current, from.countdown, to.countdown))
+    setReveal((current) => relocalise(current, from.reveal, to.reveal))
+    setLocale(next)
+
+    try {
+      localStorage.setItem(LOCALE_KEY, next)
+    } catch {
+      // Not remembering the choice is survivable; ignoring it would not be.
+    }
+  }
 
   const instant = useMemo(
     () => (date && time && timeZone ? resolveInstant(`${date}T${time}`, timeZone) : null),
@@ -201,6 +205,7 @@ export function Configurator({
       timeZone,
       colors,
       options,
+      locale,
       countdown,
       reveal,
     }
@@ -215,11 +220,8 @@ export function Configurator({
       const data = await response.json()
 
       if (!response.ok) {
-        setError(
-          data.error === 'horizon_exceeded'
-            ? `No se pueden crear countdowns de más de ${maxHorizonDays} días.`
-            : (ERRORS[data.error] ?? 'No pudimos guardar los cambios. Probá de nuevo.'),
-        )
+        const known = t.ui.errors[data.error as keyof typeof t.ui.errors]
+        setError(known ? fill(known, { days: maxHorizonDays }) : t.ui.errors.generic)
         return
       }
 
@@ -240,7 +242,7 @@ export function Configurator({
       setMine(loadMine())
       setCreated(entry)
     } catch {
-      setError('No pudimos guardar. Probá de nuevo.')
+      setError(t.ui.errors.generic)
     } finally {
       setSending(false)
     }
@@ -250,43 +252,37 @@ export function Configurator({
     return (
       <main className="forge forge--done">
         <div className="forge__done" style={paletteVars(palette) as CSSProperties}>
-          <p className="forge__eyebrow">Listo</p>
-          <h1 className="forge__title">Tu countdown ya existe</h1>
+          <p className="forge__eyebrow">{t.ui.done.eyebrow}</p>
+          <h1 className="forge__title">{t.ui.done.title}</h1>
 
           <div className="handoff">
             <div className="handoff__card">
-              <p className="handoff__what">Para tus invitados</p>
-              <p className="handoff__why">
-                Compartilo con quien quieras. Nadie que lo abra puede ver el sexo hasta la hora que
-                elegiste.
-              </p>
-              <CopyLink url={created.url} />
+              <p className="handoff__what">{t.ui.done.guestsWhat}</p>
+              <p className="handoff__why">{t.ui.done.guestsWhy}</p>
+              <CopyLink url={created.url} copy={t.ui.link} />
             </div>
 
             <div className="handoff__card handoff__card--secret">
-              <p className="handoff__what">Solo para vos</p>
+              <p className="handoff__what">{t.ui.done.secretWhat}</p>
               <p className="handoff__why">
-                Con este link ves cómo viene la votación sin votar, y podés cambiar los textos, los
-                colores y la hora. <strong>No lo compartas</strong>: quien lo tenga puede editar tu
-                countdown.
+                {t.ui.done.secretWhyBefore}
+                <strong>{t.ui.done.secretWhyStrong}</strong>
+                {t.ui.done.secretWhyAfter}
               </p>
-              <CopyLink url={created.adminUrl} tone="secret" />
+              <CopyLink url={created.adminUrl} tone="secret" copy={t.ui.link} />
             </div>
           </div>
 
           <div className="forge__actions">
             <a className="forge__go" href={created.adminUrl}>
-              Ir a mi panel
+              {t.ui.done.goPanel}
             </a>
             <button type="button" className="forge__again" onClick={() => setCreated(null)}>
-              Armar otro
+              {t.ui.done.again}
             </button>
           </div>
 
-          <p className="forge__fine">
-            Guardá los dos links fuera de este navegador. No hay cuenta ni forma de recuperarlos. El
-            countdown y sus votos se borran {retentionDays} días después de la revelación.
-          </p>
+          <p className="forge__fine">{fill(t.ui.done.fine, { retention: retentionDays })}</p>
         </div>
       </main>
     )
@@ -296,83 +292,91 @@ export function Configurator({
     <main className="forge">
       <form className="forge__form" onSubmit={submit}>
         {!edit && (
-          <header className="forge__header">
-            <p className="forge__eyebrow">Armá tu reveal</p>
-            <h1 className="forge__title">Un solo instante, en todo el mundo</h1>
-            <p className="forge__lead">
-              Elegí la hora y el sexo, escribí lo que quieras que se lea, y llevate un link para
-              compartir. El reloj llega a cero al mismo tiempo para todos, estén donde estén.
-            </p>
-          </header>
+          <>
+            <div className="tongues" role="group" aria-label={t.ui.language}>
+              {LOCALES.map((option) => (
+                <button
+                  type="button"
+                  key={option}
+                  className={`tongues__pick${option === locale ? ' tongues__pick--on' : ''}`}
+                  aria-pressed={option === locale}
+                  onClick={() => switchTo(option)}
+                >
+                  {LOCALE_NAMES[option]}
+                </button>
+              ))}
+            </div>
+
+            <header className="forge__header">
+              <p className="forge__eyebrow">{t.ui.forge.eyebrow}</p>
+              <h1 className="forge__title">{t.ui.forge.title}</h1>
+              <p className="forge__lead">{t.ui.forge.lead}</p>
+            </header>
+          </>
         )}
 
         {/* Not editable from the organiser panel: the answer is the one thing
             that must not reach any browser before the hour, this one included. */}
         {!edit && (
-        <section className="block">
-          <h2 className="block__title">El secreto</h2>
-          <p className="block__hint">
-            Vive solo en el servidor. No viaja al navegador de nadie hasta que pasa la hora.
-          </p>
+          <section className="block">
+            <h2 className="block__title">{t.ui.forge.secretTitle}</h2>
+            <p className="block__hint">{t.ui.forge.secretHint}</p>
 
-          <div className="pick" role="group" aria-label="Sexo del bebé">
-            {(['girl', 'boy'] as const).map((option) => (
-              <button
-                type="button"
-                key={option}
-                className={`pick__option pick__option--${option}${gender === option ? ' pick__option--on' : ''}`}
-                aria-pressed={gender === option}
-                style={
-                  {
-                    '--tone': option === 'girl' ? colors.girl : colors.boy,
-                    '--tone-deep': option === 'girl' ? palette.girl.deep : palette.boy.deep,
-                  } as CSSProperties
-                }
-                onClick={() => setGender(option)}
-              >
-                {option === 'girl' ? countdown.girlLabel : countdown.boyLabel}
-              </button>
-            ))}
-          </div>
-        </section>
+            <div className="pick" role="group" aria-label={t.ui.forge.secretGroup}>
+              {(['girl', 'boy'] as const).map((option) => (
+                <button
+                  type="button"
+                  key={option}
+                  className={`pick__option pick__option--${option}${gender === option ? ' pick__option--on' : ''}`}
+                  aria-pressed={gender === option}
+                  style={
+                    {
+                      '--tone': option === 'girl' ? colors.girl : colors.boy,
+                      '--tone-deep': option === 'girl' ? palette.girl.deep : palette.boy.deep,
+                    } as CSSProperties
+                  }
+                  onClick={() => setGender(option)}
+                >
+                  {option === 'girl' ? countdown.girlLabel : countdown.boyLabel}
+                </button>
+              ))}
+            </div>
+          </section>
         )}
 
         <section className="block">
-          <h2 className="block__title">Cuándo</h2>
+          <h2 className="block__title">{t.ui.forge.whenTitle}</h2>
 
           <div className="when">
             <label className="field">
-              <span>Fecha</span>
+              <span>{t.ui.forge.dateLabel}</span>
               <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
             </label>
 
             <label className="field">
-              <span>Hora</span>
+              <span>{t.ui.forge.timeLabel}</span>
               <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
             </label>
 
             <div className="field field--wide">
-              <TimeZonePicker value={timeZone} onChange={setTimeZone} label="Zona horaria" />
+              <TimeZonePicker value={timeZone} onChange={setTimeZone} copy={t.ui.zone} />
             </div>
           </div>
 
           {horizonMs !== null && (
             <p className={`when__preview${tooFar || inPast ? ' when__preview--bad' : ''}`}>
               {inPast
-                ? 'Esa hora ya pasó.'
+                ? t.ui.forge.previewPast
                 : tooFar
-                  ? `Son más de ${maxHorizonDays} días. Elegí una fecha más cerca.`
-                  : `Faltarían ${countdownText(horizonMs)} desde ahora.`}
+                  ? fill(t.ui.forge.previewTooFar, { days: maxHorizonDays })
+                  : fill(t.ui.forge.previewLeft, { left: humanGap(horizonMs, t.ui.units) })}
             </p>
           )}
         </section>
 
         <section className="block">
-          <h2 className="block__title">Colores</h2>
-          <p className="block__hint">
-            De estos dos sale toda la paleta: los globos, las tarjetas, el confeti y el cielo del
-            final.
-          </p>
+          <h2 className="block__title">{t.ui.forge.colorsTitle}</h2>
+          <p className="block__hint">{t.ui.forge.colorsHint}</p>
 
           <div className="tones">
             {(['girl', 'boy'] as const).map((option) => (
@@ -381,7 +385,7 @@ export function Configurator({
                   type="color"
                   value={colors[option]}
                   onChange={(e) => setColors({ ...colors, [option]: e.target.value })}
-                  aria-label={option === 'girl' ? 'Color de nena' : 'Color de nene'}
+                  aria-label={option === 'girl' ? t.ui.forge.girlColorLabel : t.ui.forge.boyColorLabel}
                 />
                 <span className="tone__name">
                   {option === 'girl' ? countdown.girlLabel : countdown.boyLabel}
@@ -399,7 +403,7 @@ export function Configurator({
         </section>
 
         <section className="block">
-          <h2 className="block__title">Opciones</h2>
+          <h2 className="block__title">{t.ui.forge.optionsTitle}</h2>
 
           <label className="switch">
             <input
@@ -408,8 +412,8 @@ export function Configurator({
               onChange={(event) => setOptions({ ...options, votingEnabled: event.target.checked })}
             />
             <span className="switch__text">
-              <b>Dejar que voten</b>
-              <small>Si lo apagás, la página es solo la cuenta regresiva.</small>
+              <b>{t.ui.forge.votingSwitch}</b>
+              <small>{t.ui.forge.votingSwitchHint}</small>
             </span>
           </label>
 
@@ -420,19 +424,19 @@ export function Configurator({
               onChange={(event) => setOptions({ ...options, showVoters: event.target.checked })}
             />
             <span className="switch__text">
-              <b>Mostrar quién votó qué al final</b>
-              <small>Con esto apagado, al llegar a cero solo se ven los números.</small>
+              <b>{t.ui.forge.votersSwitch}</b>
+              <small>{t.ui.forge.votersSwitchHint}</small>
             </span>
           </label>
         </section>
 
         <details className="block block--fold">
-          <summary className="block__title">Textos de la cuenta regresiva</summary>
+          <summary className="block__title">{t.ui.forge.countdownTextsTitle}</summary>
           <div className="fields">
-            {(Object.keys(COUNTDOWN_LABELS) as Array<keyof CountdownCopy>).map((field) => (
+            {(Object.keys(COUNTDOWN_LIMITS) as Array<keyof CountdownCopy>).map((field) => (
               <Field
                 key={field}
-                label={COUNTDOWN_LABELS[field]}
+                label={t.ui.labels.countdown[field]}
                 limit={COUNTDOWN_LIMITS[field]}
                 value={countdown[field]}
                 onChange={(value) => setCountdown({ ...countdown, [field]: value })}
@@ -442,16 +446,13 @@ export function Configurator({
         </details>
 
         <details className="block block--fold">
-          <summary className="block__title">Textos de la revelación</summary>
-          <p className="block__hint">
-            Nada de esto llega al navegador hasta que pasa la hora, así que podés escribir lo que
-            quieras sin miedo a que alguien lo espíe.
-          </p>
+          <summary className="block__title">{t.ui.forge.revealTextsTitle}</summary>
+          <p className="block__hint">{t.ui.forge.revealTextsHint}</p>
           <div className="fields">
-            {(Object.keys(REVEAL_LABELS) as Array<keyof RevealTexts>).map((field) => (
+            {(Object.keys(REVEAL_LIMITS) as Array<keyof RevealTexts>).map((field) => (
               <Field
                 key={field}
-                label={REVEAL_LABELS[field]}
+                label={t.ui.labels.reveal[field]}
                 limit={REVEAL_LIMITS[field]}
                 value={reveal[field]}
                 onChange={(value) => setReveal({ ...reveal, [field]: value })}
@@ -463,21 +464,20 @@ export function Configurator({
         {error && <p className="forge__error">{error}</p>}
 
         <button className="forge__submit" type="submit" disabled={!canSubmit}>
-          {sending ? 'Guardando…' : edit ? 'Guardar los cambios' : 'Generar el link'}
+          {sending ? t.ui.forge.submitSending : edit ? t.ui.forge.submitEdit : t.ui.forge.submit}
         </button>
 
         <p className="forge__fine">
-          Máximo {maxHorizonDays} días de anticipación. El link y los votos se guardan hasta{' '}
-          {retentionDays} días después de la revelación.
+          {fill(t.ui.forge.fine, { days: maxHorizonDays, retention: retentionDays })}
         </p>
 
         {!edit && mine.length > 0 && (
           <section className="block">
-            <h2 className="block__title">Los que armaste en este navegador</h2>
+            <h2 className="block__title">{t.ui.forge.mineTitle}</h2>
             <ul className="mine">
               {mine.map((entry) => (
                 <li key={entry.hash}>
-                  <a href={entry.url}>{entry.title}</a>
+                  <a href={entry.adminUrl ?? entry.url}>{entry.title}</a>
                   <code>{entry.hash}</code>
                 </li>
               ))}

@@ -1,12 +1,13 @@
 import defaults from '@/content/defaults.json'
+import en from '@/content/copy/en.json'
 
 export type Gender = 'girl' | 'boy'
 
 /** The copy that is safe to ship to every browser from the first byte. */
-export type CountdownCopy = typeof defaults.countdown
+export type CountdownCopy = typeof en.countdown
 
 /** Both possible endings, as the creator wrote them. Server-side only. */
-export type RevealTexts = typeof defaults.reveal
+export type RevealTexts = typeof en.reveal
 
 /**
  * The ending the server picked, ready to render. `word` arrives already
@@ -28,6 +29,7 @@ export type RevealCopy = {
   hostLine: string
 }
 
+/** Everything about a countdown that is the same in every language. */
 export const defaultConfig = defaults
 
 /** Fills `{placeholders}` in the configurable copy. */
@@ -39,7 +41,8 @@ export function fill(template: string, values: Record<string, string | number>):
 
 /**
  * Field name → maximum length. Doubles as the allow-list: anything a creator
- * submits that is not named here is dropped rather than stored.
+ * submits that is not named here is dropped rather than stored. Lengths are the
+ * same in every language; only the wording changes.
  */
 export const COUNTDOWN_LIMITS: Record<keyof CountdownCopy, number> = {
   pageTitle: 80,

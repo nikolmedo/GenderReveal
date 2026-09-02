@@ -1,14 +1,28 @@
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import { Configurator } from '@/components/Configurator'
+import { copyFor, pickLocale } from '@/lib/i18n'
 import { defaultConfig } from '@/lib/messages'
 import { MAX_HORIZON_DAYS, RETENTION_DAYS } from '@/lib/reveals'
 
-export const metadata: Metadata = {
-  title: 'Armá tu reveal',
-  description: 'Configurá la hora, el sexo, los textos y los colores, y llevate un link para compartir.',
+export const dynamic = 'force-dynamic'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = copyFor(pickLocale((await headers()).get('accept-language')))
+
+  return {
+    title: t.ui.forge.eyebrow,
+    description: t.ui.forge.lead,
+  }
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Guessed from the request rather than after mount, so the first paint is
+  // already in the visitor's language. A choice they made before overrides it
+  // from localStorage once the client takes over.
+  const locale = pickLocale((await headers()).get('accept-language'))
+  const t = copyFor(locale)
+
   return (
     // The credit lives here rather than inside the Configurator so it cannot
     // reach a countdown page: /r/[hash] is a different route and never renders
@@ -18,10 +32,11 @@ export default function HomePage() {
         defaults={defaultConfig}
         maxHorizonDays={MAX_HORIZON_DAYS}
         retentionDays={RETENTION_DAYS}
+        initialLocale={locale}
       />
 
       <footer className="credit">
-        Desarrollado por{' '}
+        {t.ui.credit.by}{' '}
         <a href="https://nolmedo.dev/" target="_blank" rel="noopener noreferrer">
           Nico Olmedo
         </a>

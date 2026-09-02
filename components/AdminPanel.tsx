@@ -3,14 +3,13 @@
 import { useState, type CSSProperties } from 'react'
 import { Configurator, type EditableConfig } from '@/components/Configurator'
 import { CopyLink } from '@/components/CopyLink'
-import type { CountdownCopy, RevealTexts } from '@/lib/messages'
+import { copyFor, type Copy } from '@/lib/i18n'
+import { fill } from '@/lib/messages'
 import { useRevealState } from '@/lib/useRevealState'
 
 type Defaults = {
   colors: { girl: string; boy: string }
   options: { votingEnabled: boolean; showVoters: boolean }
-  countdown: CountdownCopy
-  reveal: RevealTexts
 }
 
 type Props = {
@@ -26,15 +25,15 @@ type Props = {
   retentionDays: number
 }
 
-function remaining(ms: number): string {
+function remaining(ms: number, units: Copy['ui']['units']): string {
   const total = Math.max(0, Math.floor(ms / 1000))
   const days = Math.floor(total / 86400)
   const hours = Math.floor(total / 3600) % 24
   const minutes = Math.floor(total / 60) % 60
 
-  if (days > 0) return `${days} ${days === 1 ? 'día' : 'días'} y ${hours} h`
-  if (hours > 0) return `${hours} h y ${minutes} min`
-  return `${minutes} min`
+  if (days > 0) return `${days} ${days === 1 ? units.day : units.days} · ${hours} ${units.hour}`
+  if (hours > 0) return `${hours} ${units.hour} · ${minutes} ${units.minute}`
+  return `${minutes} ${units.minute}`
 }
 
 /**
@@ -57,6 +56,8 @@ export function AdminPanel({
   maxHorizonDays,
   retentionDays,
 }: Props) {
+  // The panel speaks whatever language the countdown was made in.
+  const t = copyFor(config.locale)
   const state = useRevealState(hash, revealAt, serverNow)
   const [saved, setSaved] = useState(false)
 
@@ -68,33 +69,33 @@ export function AdminPanel({
     <main className="panelio" style={palette as CSSProperties}>
       <div className="panelio__inner">
         <header className="forge__header">
-          <p className="forge__eyebrow">Tu panel</p>
+          <p className="forge__eyebrow">{t.ui.panel.eyebrow}</p>
           <h1 className="forge__title">{config.countdown.title}</h1>
           <p className="forge__lead">
             {open
-              ? `Faltan ${remaining(state.remainingMs)}. Nadie sabe el resultado todavía, vos tampoco lo vas a ver acá antes de tiempo.`
-              : 'Ya llegó a cero. Abrí el link para ver la revelación.'}
+              ? fill(t.ui.panel.leadOpen, { left: remaining(state.remainingMs, t.ui.units) })
+              : t.ui.panel.leadDone}
           </p>
         </header>
 
         <section className="block">
-          <h2 className="block__title">El link para tus invitados</h2>
-          <p className="block__hint">Este es el que se comparte. El de esta página, no.</p>
-          <CopyLink url={shareUrl} />
+          <h2 className="block__title">{t.ui.panel.shareTitle}</h2>
+          <p className="block__hint">{t.ui.panel.shareHint}</p>
+          <CopyLink url={shareUrl} copy={t.ui.link} />
           <div className="forge__actions">
             <a className="forge__go" href={shareUrl}>
-              Abrir la página de invitados
+              {t.ui.panel.openGuests}
             </a>
           </div>
         </section>
 
         <section className="block">
-          <h2 className="block__title">Cómo viene la votación</h2>
+          <h2 className="block__title">{t.ui.panel.tallyTitle}</h2>
 
           {!config.options.votingEnabled ? (
-            <p className="block__hint">La votación está apagada para este countdown.</p>
+            <p className="block__hint">{t.ui.panel.votingOff}</p>
           ) : counts.total === 0 ? (
-            <p className="block__hint">Todavía no votó nadie.</p>
+            <p className="block__hint">{t.ui.panel.noVotes}</p>
           ) : (
             <div className="tally">
               <div
@@ -124,17 +125,16 @@ export function AdminPanel({
         {open ? (
           <>
             <header className="panelio__editing">
-              <h2 className="forge__title">Cambiar la configuración</h2>
-              <p className="forge__lead">
-                Se aplica al link que ya compartiste. El sexo no se toca desde acá.
-              </p>
-              {saved && <p className="panelio__saved">Guardado.</p>}
+              <h2 className="forge__title">{t.ui.panel.editTitle}</h2>
+              <p className="forge__lead">{t.ui.panel.editHint}</p>
+              {saved && <p className="panelio__saved">{t.ui.panel.saved}</p>}
             </header>
 
             <Configurator
               defaults={defaults}
               maxHorizonDays={maxHorizonDays}
               retentionDays={retentionDays}
+              initialLocale={config.locale}
               edit={{
                 adminHash,
                 config,
@@ -148,10 +148,7 @@ export function AdminPanel({
             />
           </>
         ) : (
-          <p className="forge__fine">
-            La configuración ya no se puede cambiar: el momento pasó. Todo se borra {retentionDays}{' '}
-            días después.
-          </p>
+          <p className="forge__fine">{fill(t.ui.panel.lockedFine, { retention: retentionDays })}</p>
         )}
       </div>
     </main>

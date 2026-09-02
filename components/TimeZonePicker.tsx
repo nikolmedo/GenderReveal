@@ -131,14 +131,22 @@ function offsetLabel(id: string, at: number): string {
   }
 }
 
+export type ZoneCopy = {
+  label: string
+  placeholder: string
+  open: string
+  close: string
+  empty: string
+}
+
 export function TimeZonePicker({
   value,
   onChange,
-  label,
+  copy,
 }: {
   value: string
   onChange: (zone: string) => void
-  label: string
+  copy: ZoneCopy
 }) {
   const [zones, setZones] = useState<Zone[]>([])
   const [open, setOpen] = useState(false)
@@ -288,7 +296,7 @@ export function TimeZonePicker({
   return (
     <div className="zone" ref={box}>
       <span className="zone__label" id="zone-label">
-        {label}
+        {copy.label}
       </span>
 
       <div className={`zone__control${open ? ' zone__control--open' : ''}`}>
@@ -303,7 +311,7 @@ export function TimeZonePicker({
           aria-activedescendant={open && results[active] ? `zone-${active}` : undefined}
           autoComplete="off"
           spellCheck={false}
-          placeholder="Buscá tu ciudad"
+          placeholder={copy.placeholder}
           value={open ? query : current}
           onChange={(event) => {
             setQuery(event.target.value)
@@ -317,7 +325,7 @@ export function TimeZonePicker({
           type="button"
           className="zone__toggle"
           tabIndex={-1}
-          aria-label={open ? 'Cerrar la lista' : 'Ver todas las zonas'}
+          aria-label={open ? copy.close : copy.open}
           onPointerDown={(event) => {
             // Before the input takes focus, so a second click closes instead of
             // reopening what focus just opened.
@@ -339,7 +347,7 @@ export function TimeZonePicker({
 
       {open && (
         <ul className="zone__list" id="zone-list" role="listbox" ref={list}>
-          {results.length === 0 && <li className="zone__empty">Ninguna zona coincide.</li>}
+          {results.length === 0 && <li className="zone__empty">{copy.empty}</li>}
 
           {results.map((zone, index) => (
             <li key={zone.id}>

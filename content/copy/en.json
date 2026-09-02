@@ -1,0 +1,211 @@
+{
+  "countdown": {
+    "pageTitle": "The big announcement",
+    "eyebrow": "Almost there",
+    "title": "Girl or boy?",
+    "welcome": "Wherever we all are, the clock hits zero at the same instant for everyone. Get your guess in before it does.",
+    "hostLine": "With love, the family",
+
+    "votePrompt": "So what do you reckon?",
+    "nameLabel": "Your name",
+    "namePlaceholder": "Type your name",
+    "voteButton": "Cast my guess",
+    "voteButtonSending": "Saving…",
+    "votedConfirmation": "Got it, {name}. You guessed:",
+    "voteClosedNotice": "Voting has closed.",
+    "voteErrorNotice": "We could not save your guess. Try again.",
+    "offlineNotice": "No connection to the server. Retrying…",
+
+    "tallyTitle": "How it stands",
+    "voteSingular": "guess",
+    "votePlural": "guesses",
+
+    "girlLabel": "Girl",
+    "boyLabel": "Boy",
+
+    "daysLabel": "days",
+    "hoursLabel": "hours",
+    "minutesLabel": "min",
+    "secondsLabel": "sec"
+  },
+
+  "reveal": {
+    "headline": "It's official",
+    "girlText": "a girl",
+    "boyText": "a boy",
+    "subtitle": "Thank you for being here, even from far away.",
+
+    "correct": "You called it, {name}.",
+    "wrong": "So close, {name}. Next time.",
+    "noVote": "You made it just in time for the good part.",
+    "score": "{correct} of {total} guessed right.",
+
+    "votersShow": "See the guesses",
+    "votersHide": "Hide the guesses",
+    "votersEmpty": "Nobody guessed this time.",
+    "votersMore": "and {count} more",
+
+    "hostLine": "With love, the family"
+  },
+
+  "ui": {
+    "language": "Language",
+
+    "units": {
+      "day": "day",
+      "days": "days",
+      "hour": "h",
+      "minute": "min"
+    },
+
+    "forge": {
+      "eyebrow": "Set up your reveal",
+      "title": "One instant, the whole world over",
+      "lead": "Pick the hour and the answer, write whatever you want people to read, and walk away with a link to share. The clock hits zero at the same time for everyone, wherever they are.",
+
+      "secretTitle": "The secret",
+      "secretHint": "It lives on the server alone. It reaches nobody's browser until the hour passes.",
+      "secretGroup": "The baby's sex",
+
+      "whenTitle": "When",
+      "dateLabel": "Date",
+      "timeLabel": "Time",
+      "previewLeft": "That would be {left} from now.",
+      "previewPast": "That time has already passed.",
+      "previewTooFar": "That is more than {days} days out. Pick something closer.",
+
+      "colorsTitle": "Colours",
+      "colorsHint": "These two make the whole palette: the balloons, the cards, the confetti and the sky at the end.",
+      "girlColorLabel": "Colour for girl",
+      "boyColorLabel": "Colour for boy",
+
+      "optionsTitle": "Options",
+      "votingSwitch": "Let people guess",
+      "votingSwitchHint": "Turn it off and the page is just the countdown.",
+      "votersSwitch": "Show who guessed what at the end",
+      "votersSwitchHint": "With this off, zero brings the numbers only.",
+
+      "countdownTextsTitle": "Countdown wording",
+      "revealTextsTitle": "Reveal wording",
+      "revealTextsHint": "None of this reaches a browser until the hour passes, so write what you like without worrying that somebody will peek.",
+
+      "submit": "Create the link",
+      "submitEdit": "Save the changes",
+      "submitSending": "Saving…",
+      "fine": "Up to {days} days ahead. The link and the guesses are kept until {retention} days after the reveal.",
+
+      "mineTitle": "Made in this browser"
+    },
+
+    "done": {
+      "eyebrow": "Done",
+      "title": "Your countdown exists",
+      "guestsWhat": "For your guests",
+      "guestsWhy": "Share it with whoever you like. Nobody who opens it can see the answer until the hour you picked.",
+      "secretWhat": "Just for you",
+      "secretWhyBefore": "This one shows you how the guessing is going without having to guess, and lets you change the wording, the colours and the hour. ",
+      "secretWhyStrong": "Do not share it",
+      "secretWhyAfter": ": whoever holds it can rewrite your countdown.",
+      "goPanel": "Go to my panel",
+      "again": "Make another",
+      "fine": "Save both links somewhere other than this browser. There is no account and no way to recover them. The countdown and its guesses are deleted {retention} days after the reveal."
+    },
+
+    "errors": {
+      "invalid_gender": "Pick girl or boy.",
+      "invalid_time": "Check the date, the time and the zone.",
+      "time_in_past": "That time has passed. Pick a moment in the future.",
+      "invalid_color": "Colours have to be hex, like #ff6f9c.",
+      "invalid_text": "One of the texts came out too long.",
+      "invalid_payload": "We could not read the form. Try again.",
+      "horizon_exceeded": "Countdowns cannot be set more than {days} days ahead.",
+      "generic": "We could not save that. Try again."
+    },
+
+    "panel": {
+      "eyebrow": "Your panel",
+      "leadOpen": "{left} to go. Nobody knows the answer yet, and you will not see it here early either.",
+      "leadDone": "It has hit zero. Open the link to see the reveal.",
+      "shareTitle": "The link for your guests",
+      "shareHint": "This is the one to pass around. Not the one this page is on.",
+      "openGuests": "Open the guest page",
+      "tallyTitle": "How the guessing is going",
+      "votingOff": "Guessing is switched off for this countdown.",
+      "noVotes": "Nobody has guessed yet.",
+      "editTitle": "Change the setup",
+      "editHint": "It applies to the link you already shared. The answer is not editable here.",
+      "saved": "Saved.",
+      "lockedFine": "The setup can no longer be changed: the moment has passed. Everything is deleted {retention} days later."
+    },
+
+    "link": {
+      "copy": "Copy",
+      "copied": "Copied!"
+    },
+
+    "zone": {
+      "label": "Time zone",
+      "placeholder": "Search your city",
+      "open": "Show every zone",
+      "close": "Close the list",
+      "empty": "No zone matches that."
+    },
+
+    "guest": {
+      "countdownAria": "Countdown"
+    },
+
+    "notFound": {
+      "title": "This countdown does not exist",
+      "body": "The link may be mistyped, or the party was more than a month ago and its data has been deleted.",
+      "cta": "Set up a new one"
+    },
+
+    "credit": {
+      "by": "Built by"
+    },
+
+    "labels": {
+      "countdown": {
+        "pageTitle": "Browser tab title",
+        "eyebrow": "Little label on top",
+        "title": "Main heading",
+        "welcome": "Welcome text",
+        "hostLine": "Sign-off",
+        "votePrompt": "The question",
+        "nameLabel": "Label of the name field",
+        "namePlaceholder": "Hint inside the name field",
+        "voteButton": "Vote button",
+        "voteButtonSending": "Button while saving",
+        "votedConfirmation": "After voting · uses {name}",
+        "voteClosedNotice": "Voting closed notice",
+        "voteErrorNotice": "Vote failed notice",
+        "offlineNotice": "Offline notice",
+        "tallyTitle": "Heading of the tally",
+        "voteSingular": "The word «guess»",
+        "votePlural": "The word «guesses»",
+        "girlLabel": "How the girl option reads",
+        "boyLabel": "How the boy option reads",
+        "daysLabel": "Days label",
+        "hoursLabel": "Hours label",
+        "minutesLabel": "Minutes label",
+        "secondsLabel": "Seconds label"
+      },
+      "reveal": {
+        "headline": "Kicker",
+        "girlText": "If it is a girl, it reads",
+        "boyText": "If it is a boy, it reads",
+        "subtitle": "Subtitle",
+        "correct": "If they guessed right · uses {name}",
+        "wrong": "If they guessed wrong · uses {name}",
+        "noVote": "If they never guessed",
+        "score": "Scoreline · uses {correct} and {total}",
+        "votersShow": "Button that opens the guesses",
+        "votersHide": "Button that closes them",
+        "votersEmpty": "If nobody guessed",
+        "votersMore": "If the list is cut short · uses {count}",
+        "hostLine": "Sign-off"
+      }
+    }
+  }
+}

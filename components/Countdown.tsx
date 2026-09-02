@@ -17,17 +17,19 @@ export function Countdown({
   remainingMs,
   copy,
   ready,
+  ariaLabel,
 }: {
   remainingMs: number
   copy: CountdownCopy
   ready: boolean
+  ariaLabel: string
 }) {
   const finalMinute = remainingMs > 0 && remainingMs <= 60_000
 
   return (
     <section
       className={`clock${ready ? '' : ' clock--waiting'}${finalMinute ? ' clock--imminent' : ''}`}
-      aria-label="Cuenta regresiva"
+      aria-label={ariaLabel}
     >
       {split(remainingMs, copy).map((unit, index) => (
         // Cards alternate pink and blue so neither colour leads before the hour.

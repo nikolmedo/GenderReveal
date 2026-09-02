@@ -7,54 +7,5 @@
   "options": {
     "votingEnabled": true,
     "showVoters": true
-  },
-
-  "countdown": {
-    "pageTitle": "El gran anuncio",
-    "eyebrow": "Falta poco",
-    "title": "¿Nena o nene?",
-    "welcome": "Estemos donde estemos, el reloj llega a cero en el mismo instante para todos. Dejá tu voto antes de que pase.",
-    "hostLine": "Con amor, la familia",
-
-    "votePrompt": "¿Vos qué decís que va a ser?",
-    "nameLabel": "Tu nombre",
-    "namePlaceholder": "Escribí tu nombre",
-    "voteButton": "Dejar mi voto",
-    "voteButtonSending": "Guardando…",
-    "votedConfirmation": "Listo, {name}. Anotamos tu voto:",
-    "voteClosedNotice": "La votación ya cerró.",
-    "voteErrorNotice": "No pudimos guardar tu voto. Probá de nuevo.",
-    "offlineNotice": "Sin conexión con el servidor. Reintentando…",
-
-    "tallyTitle": "Cómo viene la votación",
-    "voteSingular": "voto",
-    "votePlural": "votos",
-
-    "girlLabel": "Nena",
-    "boyLabel": "Nene",
-
-    "daysLabel": "días",
-    "hoursLabel": "horas",
-    "minutesLabel": "min",
-    "secondsLabel": "seg"
-  },
-
-  "reveal": {
-    "headline": "Es oficial",
-    "girlText": "una nena",
-    "boyText": "un nene",
-    "subtitle": "Gracias por estar acá, aunque sea desde lejos.",
-
-    "correct": "Le pegaste, {name}.",
-    "wrong": "Casi, {name}. Para la próxima.",
-    "noVote": "Llegaste justo para la parte importante.",
-    "score": "{correct} de {total} acertaron.",
-
-    "votersShow": "Ver la votación",
-    "votersHide": "Ocultar la votación",
-    "votersEmpty": "Esta vez no votó nadie.",
-    "votersMore": "y {count} más",
-
-    "hostLine": "Con amor, la familia"
   }
 }

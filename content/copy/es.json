@@ -1,0 +1,211 @@
+{
+  "countdown": {
+    "pageTitle": "El gran anuncio",
+    "eyebrow": "Falta poco",
+    "title": "¿Nena o nene?",
+    "welcome": "Estemos donde estemos, el reloj llega a cero en el mismo instante para todos. Dejá tu voto antes de que pase.",
+    "hostLine": "Con amor, la familia",
+
+    "votePrompt": "¿Vos qué decís que va a ser?",
+    "nameLabel": "Tu nombre",
+    "namePlaceholder": "Escribí tu nombre",
+    "voteButton": "Dejar mi voto",
+    "voteButtonSending": "Guardando…",
+    "votedConfirmation": "Listo, {name}. Anotamos tu voto:",
+    "voteClosedNotice": "La votación ya cerró.",
+    "voteErrorNotice": "No pudimos guardar tu voto. Probá de nuevo.",
+    "offlineNotice": "Sin conexión con el servidor. Reintentando…",
+
+    "tallyTitle": "Cómo viene la votación",
+    "voteSingular": "voto",
+    "votePlural": "votos",
+
+    "girlLabel": "Nena",
+    "boyLabel": "Nene",
+
+    "daysLabel": "días",
+    "hoursLabel": "horas",
+    "minutesLabel": "min",
+    "secondsLabel": "seg"
+  },
+
+  "reveal": {
+    "headline": "Es oficial",
+    "girlText": "una nena",
+    "boyText": "un nene",
+    "subtitle": "Gracias por estar acá, aunque sea desde lejos.",
+
+    "correct": "Le pegaste, {name}.",
+    "wrong": "Casi, {name}. Para la próxima.",
+    "noVote": "Llegaste justo para la parte importante.",
+    "score": "{correct} de {total} acertaron.",
+
+    "votersShow": "Ver la votación",
+    "votersHide": "Ocultar la votación",
+    "votersEmpty": "Esta vez no votó nadie.",
+    "votersMore": "y {count} más",
+
+    "hostLine": "Con amor, la familia"
+  },
+
+  "ui": {
+    "language": "Idioma",
+
+    "units": {
+      "day": "día",
+      "days": "días",
+      "hour": "h",
+      "minute": "min"
+    },
+
+    "forge": {
+      "eyebrow": "Armá tu reveal",
+      "title": "Un solo instante, en todo el mundo",
+      "lead": "Elegí la hora y el sexo, escribí lo que quieras que se lea, y llevate un link para compartir. El reloj llega a cero al mismo tiempo para todos, estén donde estén.",
+
+      "secretTitle": "El secreto",
+      "secretHint": "Vive solo en el servidor. No viaja al navegador de nadie hasta que pasa la hora.",
+      "secretGroup": "Sexo del bebé",
+
+      "whenTitle": "Cuándo",
+      "dateLabel": "Fecha",
+      "timeLabel": "Hora",
+      "previewLeft": "Faltarían {left} desde ahora.",
+      "previewPast": "Esa hora ya pasó.",
+      "previewTooFar": "Son más de {days} días. Elegí una fecha más cerca.",
+
+      "colorsTitle": "Colores",
+      "colorsHint": "De estos dos sale toda la paleta: los globos, las tarjetas, el confeti y el cielo del final.",
+      "girlColorLabel": "Color de nena",
+      "boyColorLabel": "Color de nene",
+
+      "optionsTitle": "Opciones",
+      "votingSwitch": "Dejar que voten",
+      "votingSwitchHint": "Si lo apagás, la página es solo la cuenta regresiva.",
+      "votersSwitch": "Mostrar quién votó qué al final",
+      "votersSwitchHint": "Con esto apagado, al llegar a cero solo se ven los números.",
+
+      "countdownTextsTitle": "Textos de la cuenta regresiva",
+      "revealTextsTitle": "Textos de la revelación",
+      "revealTextsHint": "Nada de esto llega al navegador hasta que pasa la hora, así que podés escribir lo que quieras sin miedo a que alguien lo espíe.",
+
+      "submit": "Generar el link",
+      "submitEdit": "Guardar los cambios",
+      "submitSending": "Guardando…",
+      "fine": "Máximo {days} días de anticipación. El link y los votos se guardan hasta {retention} días después de la revelación.",
+
+      "mineTitle": "Los que armaste en este navegador"
+    },
+
+    "done": {
+      "eyebrow": "Listo",
+      "title": "Tu countdown ya existe",
+      "guestsWhat": "Para tus invitados",
+      "guestsWhy": "Compartilo con quien quieras. Nadie que lo abra puede ver el sexo hasta la hora que elegiste.",
+      "secretWhat": "Solo para vos",
+      "secretWhyBefore": "Con este link ves cómo viene la votación sin votar, y podés cambiar los textos, los colores y la hora. ",
+      "secretWhyStrong": "No lo compartas",
+      "secretWhyAfter": ": quien lo tenga puede editar tu countdown.",
+      "goPanel": "Ir a mi panel",
+      "again": "Armar otro",
+      "fine": "Guardá los dos links fuera de este navegador. No hay cuenta ni forma de recuperarlos. El countdown y sus votos se borran {retention} días después de la revelación."
+    },
+
+    "errors": {
+      "invalid_gender": "Elegí nena o nene.",
+      "invalid_time": "Revisá la fecha, la hora y la zona horaria.",
+      "time_in_past": "Esa hora ya pasó. Elegí un momento futuro.",
+      "invalid_color": "Los colores tienen que ser hexadecimales, tipo #ff6f9c.",
+      "invalid_text": "Alguno de los textos quedó demasiado largo.",
+      "invalid_payload": "No pudimos leer el formulario. Probá de nuevo.",
+      "horizon_exceeded": "No se pueden crear countdowns de más de {days} días.",
+      "generic": "No pudimos guardar. Probá de nuevo."
+    },
+
+    "panel": {
+      "eyebrow": "Tu panel",
+      "leadOpen": "Faltan {left}. Nadie sabe el resultado todavía, vos tampoco lo vas a ver acá antes de tiempo.",
+      "leadDone": "Ya llegó a cero. Abrí el link para ver la revelación.",
+      "shareTitle": "El link para tus invitados",
+      "shareHint": "Este es el que se comparte. El de esta página, no.",
+      "openGuests": "Abrir la página de invitados",
+      "tallyTitle": "Cómo viene la votación",
+      "votingOff": "La votación está apagada para este countdown.",
+      "noVotes": "Todavía no votó nadie.",
+      "editTitle": "Cambiar la configuración",
+      "editHint": "Se aplica al link que ya compartiste. El sexo no se toca desde acá.",
+      "saved": "Guardado.",
+      "lockedFine": "La configuración ya no se puede cambiar: el momento pasó. Todo se borra {retention} días después."
+    },
+
+    "link": {
+      "copy": "Copiar",
+      "copied": "¡Copiado!"
+    },
+
+    "zone": {
+      "label": "Zona horaria",
+      "placeholder": "Buscá tu ciudad",
+      "open": "Ver todas las zonas",
+      "close": "Cerrar la lista",
+      "empty": "Ninguna zona coincide."
+    },
+
+    "guest": {
+      "countdownAria": "Cuenta regresiva"
+    },
+
+    "notFound": {
+      "title": "Este countdown no existe",
+      "body": "El link puede estar mal copiado, o la fiesta ya pasó hace más de un mes y sus datos se borraron.",
+      "cta": "Armar uno nuevo"
+    },
+
+    "credit": {
+      "by": "Desarrollado por"
+    },
+
+    "labels": {
+      "countdown": {
+        "pageTitle": "Título de la pestaña",
+        "eyebrow": "Etiqueta de arriba",
+        "title": "Título principal",
+        "welcome": "Bienvenida",
+        "hostLine": "Firma del pie",
+        "votePrompt": "Pregunta de la votación",
+        "nameLabel": "Etiqueta del campo nombre",
+        "namePlaceholder": "Texto guía del nombre",
+        "voteButton": "Botón de votar",
+        "voteButtonSending": "Botón mientras guarda",
+        "votedConfirmation": "Confirmación al votar · usa {name}",
+        "voteClosedNotice": "Aviso de votación cerrada",
+        "voteErrorNotice": "Aviso de error al votar",
+        "offlineNotice": "Aviso de sin conexión",
+        "tallyTitle": "Título del conteo",
+        "voteSingular": "Palabra «voto»",
+        "votePlural": "Palabra «votos»",
+        "girlLabel": "Cómo se lee la opción nena",
+        "boyLabel": "Cómo se lee la opción nene",
+        "daysLabel": "Rótulo de días",
+        "hoursLabel": "Rótulo de horas",
+        "minutesLabel": "Rótulo de minutos",
+        "secondsLabel": "Rótulo de segundos"
+      },
+      "reveal": {
+        "headline": "Antetítulo",
+        "girlText": "Si es nena, se lee",
+        "boyText": "Si es nene, se lee",
+        "subtitle": "Subtítulo",
+        "correct": "Si acertó · usa {name}",
+        "wrong": "Si erró · usa {name}",
+        "noVote": "Si no llegó a votar",
+        "score": "Marcador · usa {correct} y {total}",
+        "votersShow": "Botón para ver la votación",
+        "votersHide": "Botón para ocultarla",
+        "votersEmpty": "Si no votó nadie",
+        "votersMore": "Si la lista se corta · usa {count}",
+        "hostLine": "Firma del pie"
+      }
+    }
+  }
+}

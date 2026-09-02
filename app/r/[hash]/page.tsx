@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { RevealExperience } from '@/components/RevealExperience'
 import { paletteVars } from '@/lib/palette'
 import { loadReveal } from '@/lib/reveals'
+import { copyFor } from '@/lib/i18n'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,6 +41,7 @@ export default async function RevealPage({ params }: Params) {
       copy={reveal.config.countdown}
       palette={paletteVars(reveal.palette)}
       votingEnabled={reveal.config.options.votingEnabled}
+      countdownAria={copyFor(reveal.config.locale).ui.guest.countdownAria}
     />
   )
 }

@@ -11,6 +11,7 @@ import {
 import { revealStore } from '@/lib/store'
 import type { RevealRow } from '@/lib/store/types'
 import { isValidTimeZone, resolveInstant } from '@/lib/time'
+import { copyFor, DEFAULT_LOCALE, isLocale, LEGACY_LOCALE, type Locale } from '@/lib/i18n'
 
 /** How far ahead a countdown may be set. */
 export const MAX_HORIZON_DAYS = 45
@@ -35,6 +36,8 @@ export type StoredConfig = {
   reveal: RevealTexts
   colors: { girl: string; boy: string }
   options: RevealOptions
+  /** Fixed when the link is made. A countdown speaks one language forever. */
+  locale: Locale
   timeZone: string
   wallClock: string
 }
@@ -171,8 +174,13 @@ export function validate(body: unknown): { config: StoredConfig; gender: Gender;
   const boyColor = colors.boy ?? defaultConfig.colors.boy
   if (!isHexColor(girlColor) || !isHexColor(boyColor)) return 'invalid_color'
 
-  const countdown = cleanCopy(input.countdown ?? {}, COUNTDOWN_LIMITS, defaultConfig.countdown)
-  const reveal = cleanCopy(input.reveal ?? {}, REVEAL_LIMITS, defaultConfig.reveal)
+  // Anything the creator left blank falls back to the wording of the language
+  // they were looking at, not to whichever one happens to be the default.
+  const locale = isLocale(input.locale) ? input.locale : DEFAULT_LOCALE
+  const fallback = copyFor(locale)
+
+  const countdown = cleanCopy(input.countdown ?? {}, COUNTDOWN_LIMITS, fallback.countdown)
+  const reveal = cleanCopy(input.reveal ?? {}, REVEAL_LIMITS, fallback.reveal)
   if (!countdown || !reveal) return 'invalid_text'
 
   return {
@@ -183,6 +191,7 @@ export function validate(body: unknown): { config: StoredConfig; gender: Gender;
       reveal,
       colors: { girl: girlColor, boy: boyColor },
       options: cleanOptions(input.options),
+      locale,
       timeZone,
       wallClock,
     },
@@ -234,14 +243,21 @@ function hydrate(row: RevealRow | null, now: number): LoadedReveal | null {
 
   const stored = JSON.parse(row.config) as StoredConfig
 
+  // Every countdown stored before locales existed was written in Spanish, so
+  // that is what a missing one means here. New ones default to English instead;
+  // the two are different questions with different right answers.
+  const locale = isLocale(stored.locale) ? stored.locale : LEGACY_LOCALE
+  const fallback = copyFor(locale)
+
   // A countdown stored before a field existed simply has no value for it. Fill
-  // the gaps from the defaults rather than rendering a blank button at the one
-  // moment the whole thing is for.
+  // the gaps from its own language rather than rendering a blank button at the
+  // one moment the whole thing is for.
   const config: StoredConfig = {
     ...stored,
-    countdown: { ...defaultConfig.countdown, ...stored.countdown },
-    reveal: { ...defaultConfig.reveal, ...stored.reveal },
+    countdown: { ...fallback.countdown, ...stored.countdown },
+    reveal: { ...fallback.reveal, ...stored.reveal },
     options: cleanOptions(stored.options),
+    locale,
   }
 
   return {
@@ -290,7 +306,14 @@ export async function updateReveal(adminHash: string, body: unknown): Promise<Up
   // the copy would change what guests are looking at right now.
   if (now >= existing.revealAt) return { ok: false, error: 'already_revealed' }
 
-  const parsed = validate({ ...(body as object), gender: existing.gender })
+  // The gender and the language are both fixed at creation. Without pinning
+  // them here, an edit that simply does not mention the locale would silently
+  // flip somebody's Spanish countdown into English.
+  const parsed = validate({
+    ...(body as object),
+    gender: existing.gender,
+    locale: existing.config.locale,
+  })
   if (typeof parsed === 'string') return { ok: false, error: parsed }
 
   const expiresAt = parsed.revealAt + RETENTION_DAYS * DAY_MS

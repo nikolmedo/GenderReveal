@@ -16,9 +16,10 @@ type Props = {
   serverNow: number
   copy: CountdownCopy
   palette: Record<string, string>
+  votingEnabled: boolean
 }
 
-export function RevealExperience({ hash, revealAt, serverNow, copy, palette }: Props) {
+export function RevealExperience({ hash, revealAt, serverNow, copy, palette, votingEnabled }: Props) {
   const state = useRevealState(hash, revealAt, serverNow)
   const { vote, loaded, save } = useMyVote(hash)
 
@@ -76,6 +77,7 @@ export function RevealExperience({ hash, revealAt, serverNow, copy, palette }: P
 
             <Countdown remainingMs={state.remainingMs} copy={copy} ready={state.ready} />
 
+            {votingEnabled && (
             <VotePanel
               hash={hash}
               copy={copy}
@@ -86,6 +88,7 @@ export function RevealExperience({ hash, revealAt, serverNow, copy, palette }: P
               onSaved={save}
               onCounts={state.applyCounts}
             />
+            )}
 
             <footer className="outro">
               <p>{copy.hostLine}</p>

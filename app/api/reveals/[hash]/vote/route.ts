@@ -15,6 +15,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ has
     return NextResponse.json({ error: 'not_found' }, { status: 404 })
   }
 
+  // Enforced here rather than by hiding the form: a countdown with voting off
+  // has no ballot to bypass, but the endpoint is public either way.
+  if (!reveal.config.options.votingEnabled) {
+    return NextResponse.json({ error: 'voting_disabled' }, { status: 403 })
+  }
+
   // Gated on this reveal's own instant, not a global one: two countdowns can
   // be open at once and close hours apart.
   if (now >= reveal.revealAt) {

@@ -39,6 +39,7 @@ export default async function RevealPage({ params }: Params) {
       serverNow={Date.now()}
       copy={reveal.config.countdown}
       palette={paletteVars(reveal.palette)}
+      votingEnabled={reveal.config.options.votingEnabled}
     />
   )
 }

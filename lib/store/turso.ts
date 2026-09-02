@@ -5,16 +5,32 @@ import {
   emptyTally,
   emptyVoters,
   INSERT_REVEAL,
+  MIGRATIONS,
   PURGE_REVEALS,
   PURGE_VOTES,
   SCHEMA,
   SELECT_REVEAL,
+  SELECT_REVEAL_BY_ADMIN,
   TALLY,
+  UPDATE_REVEAL,
   UPSERT_VOTE,
   VOTERS,
   type RevealRow,
   type RevealStore,
 } from '@/lib/store/types'
+
+function toRow(row: Record<string, unknown> | undefined): RevealRow | null {
+  if (!row) return null
+
+  return {
+    hash: String(row.hash),
+    adminHash: row.admin_hash == null ? null : String(row.admin_hash),
+    gender: row.gender as Gender,
+    revealAt: Number(row.reveal_at),
+    expiresAt: Number(row.expires_at),
+    config: String(row.config),
+  }
+}
 
 /**
  * Production adapter.
@@ -31,6 +47,11 @@ export function tursoStore(url: string, authToken?: string): RevealStore {
     client ??= createClient({ url, authToken })
     ready ??= (async () => {
       for (const statement of SCHEMA) await client!.execute(statement)
+      // Each migration is expected to fail once the change it makes is already
+      // in place; that is the only signal SQLite offers.
+      for (const statement of MIGRATIONS) {
+        await client!.execute(statement).catch(() => undefined)
+      }
     })()
     await ready
     return client
@@ -41,23 +62,20 @@ export function tursoStore(url: string, authToken?: string): RevealStore {
       const db = await connect()
       await db.execute({
         sql: INSERT_REVEAL,
-        args: [row.hash, row.gender, row.revealAt, row.expiresAt, row.config, Date.now()],
+        args: [row.hash, row.adminHash, row.gender, row.revealAt, row.expiresAt, row.config, Date.now()],
       })
     },
 
     async getReveal(hash) {
       const db = await connect()
       const result = await db.execute({ sql: SELECT_REVEAL, args: [hash] })
-      const row = result.rows[0]
-      if (!row) return null
+      return toRow(result.rows[0])
+    },
 
-      return {
-        hash: String(row.hash),
-        gender: row.gender as Gender,
-        revealAt: Number(row.reveal_at),
-        expiresAt: Number(row.expires_at),
-        config: String(row.config),
-      }
+    async getRevealByAdmin(adminHash) {
+      const db = await connect()
+      const result = await db.execute({ sql: SELECT_REVEAL_BY_ADMIN, args: [adminHash] })
+      return toRow(result.rows[0])
     },
 
     async purgeExpired(now) {
@@ -84,6 +102,11 @@ export function tursoStore(url: string, authToken?: string): RevealStore {
       }
 
       return counts
+    },
+
+    async updateReveal(adminHash, revealAt, expiresAt, config) {
+      const db = await connect()
+      await db.execute({ sql: UPDATE_REVEAL, args: [revealAt, expiresAt, config, adminHash] })
     },
 
     async voters(hash) {

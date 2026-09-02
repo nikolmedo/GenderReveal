@@ -164,7 +164,8 @@ turso db show gender-reveal --url          # → TURSO_DATABASE_URL
 turso db tokens create gender-reveal       # → TURSO_AUTH_TOKEN
 ```
 
-The schema builds itself on the first request. No migration step.
+The schema builds itself on the first request, and so do the few `ALTER`s that
+came after it. Nothing to run by hand.
 
 **2. Import the repo on Vercel** and add these under *Settings → Environment
 Variables*:
@@ -181,6 +182,13 @@ and the endpoint refuses anything else.
 **3. Send the link.** Guests need no account and no app. Reveal pages are
 `noindex`, so Google won't find out before grandma does.
 
+Creating a countdown hands back **two** links. The one you share, and a private
+one that opens your own panel: the running tally without having to vote, and a
+form to change the wording, the colours or the hour on the link people already
+have. The panel cannot see or change the gender, so even the organiser's browser
+holds nothing before the moment. Two switches live there too, both on by
+default: whether guests can vote at all, and whether their names show at the end.
+
 ## ✅ Before the day
 
 - [ ] Made the countdown on the deployed site, not on localhost
@@ -188,7 +196,9 @@ and the endpoint refuses anything else.
 - [ ] Set your laptop clock two hours off and confirmed the countdown ignored
       you, which is the drift correction earning its keep
 - [ ] Left a test vote, then cleared `localStorage` before sharing anything
-- [ ] **Saved the link somewhere that isn't this browser**
+- [ ] **Saved both links somewhere that isn't this browser**, especially the
+      private one: anyone holding it can rewrite your countdown, and losing it
+      means losing the panel for good
 
 That last one is not decoration. The form keeps a list of what you made in
 `localStorage` and shows it under the form, but there's no account and no

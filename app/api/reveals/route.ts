@@ -30,6 +30,9 @@ export async function POST(request: Request) {
     {
       hash: result.hash,
       path: `/r/${result.hash}`,
+      // The organiser's own way back in. Handed over once, never listed
+      // anywhere, and impossible to derive from the public link.
+      adminPath: `/a/${result.adminHash}`,
       revealAt: result.revealAt,
       expiresAt: result.expiresAt,
     },

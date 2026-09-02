@@ -43,7 +43,9 @@ export function Reveal({ copy, gender, counts, correct, myVote, names, labels }:
 
         <div className="verdict">
           <p className={`verdict__line${verdictTone}`}>{verdict}</p>
-          <p className="verdict__score">{fill(copy.score, { correct, total: counts.total })}</p>
+          {counts.total > 0 && (
+            <p className="verdict__score">{fill(copy.score, { correct, total: counts.total })}</p>
+          )}
         </div>
 
         {names && (

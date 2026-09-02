@@ -4,6 +4,11 @@
     "boy": "#4fb3f0"
   },
 
+  "options": {
+    "votingEnabled": true,
+    "showVoters": true
+  },
+
   "countdown": {
     "pageTitle": "El gran anuncio",
     "eyebrow": "Falta poco",

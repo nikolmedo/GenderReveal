@@ -5,11 +5,14 @@ import {
   emptyTally,
   emptyVoters,
   INSERT_REVEAL,
+  MIGRATIONS,
   PURGE_REVEALS,
   PURGE_VOTES,
   SCHEMA,
   SELECT_REVEAL,
+  SELECT_REVEAL_BY_ADMIN,
   TALLY,
+  UPDATE_REVEAL,
   UPSERT_VOTE,
   VOTERS,
   type RevealStore,
@@ -17,10 +20,24 @@ import {
 
 type RawReveal = {
   hash: string
+  admin_hash: string | null
   gender: Gender
   reveal_at: number
   expires_at: number
   config: string
+}
+
+function toRow(row: RawReveal | undefined) {
+  if (!row) return null
+
+  return {
+    hash: row.hash,
+    adminHash: row.admin_hash ?? null,
+    gender: row.gender,
+    revealAt: Number(row.reveal_at),
+    expiresAt: Number(row.expires_at),
+    config: row.config,
+  }
 }
 
 /**
@@ -35,6 +52,15 @@ export function localFileStore(path = 'local.db'): RevealStore {
     if (!db) {
       db = new DatabaseSync(path)
       for (const statement of SCHEMA) db.exec(statement)
+      // Expected to fail once the change is already in place; that is the only
+      // signal SQLite offers for "column already added".
+      for (const statement of MIGRATIONS) {
+        try {
+          db.exec(statement)
+        } catch {
+          // already applied
+        }
+      }
     }
     return db
   }
@@ -43,20 +69,19 @@ export function localFileStore(path = 'local.db'): RevealStore {
     async createReveal(row) {
       open()
         .prepare(INSERT_REVEAL)
-        .run(row.hash, row.gender, row.revealAt, row.expiresAt, row.config, Date.now())
+        .run(row.hash, row.adminHash, row.gender, row.revealAt, row.expiresAt, row.config, Date.now())
     },
 
     async getReveal(hash) {
-      const row = open().prepare(SELECT_REVEAL).get(hash) as RawReveal | undefined
-      if (!row) return null
+      return toRow(open().prepare(SELECT_REVEAL).get(hash) as RawReveal | undefined)
+    },
 
-      return {
-        hash: row.hash,
-        gender: row.gender,
-        revealAt: Number(row.reveal_at),
-        expiresAt: Number(row.expires_at),
-        config: row.config,
-      }
+    async getRevealByAdmin(adminHash) {
+      return toRow(open().prepare(SELECT_REVEAL_BY_ADMIN).get(adminHash) as RawReveal | undefined)
+    },
+
+    async updateReveal(adminHash, revealAt, expiresAt, config) {
+      open().prepare(UPDATE_REVEAL).run(revealAt, expiresAt, config, adminHash)
     },
 
     async purgeExpired(now) {

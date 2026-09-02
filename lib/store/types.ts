@@ -6,6 +6,8 @@ export type Voters = { girl: string[]; boy: string[] }
 
 export type RevealRow = {
   hash: string
+  /** The organiser's private token. Null on reveals made before it existed. */
+  adminHash: string | null
   gender: Gender
   revealAt: number
   expiresAt: number
@@ -21,6 +23,10 @@ export type RevealRow = {
 export type RevealStore = {
   createReveal(row: RevealRow): Promise<void>
   getReveal(hash: string): Promise<RevealRow | null>
+  /** Looks a reveal up by the organiser's token rather than the public one. */
+  getRevealByAdmin(adminHash: string): Promise<RevealRow | null>
+  /** Rewrites the editable parts. The gender is deliberately not among them. */
+  updateReveal(adminHash: string, revealAt: number, expiresAt: number, config: string): Promise<void>
   /** Removes reveals past their retention window, and their votes with them. */
   purgeExpired(now: number): Promise<number>
 
@@ -36,6 +42,7 @@ export type RevealStore = {
 export const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS reveals (
      hash       TEXT PRIMARY KEY,
+     admin_hash TEXT,
      gender     TEXT NOT NULL CHECK (gender IN ('girl', 'boy')),
      reveal_at  INTEGER NOT NULL,
      expires_at INTEGER NOT NULL,
@@ -54,13 +61,34 @@ export const SCHEMA = [
   `CREATE INDEX IF NOT EXISTS reveals_by_expiry ON reveals (expires_at)`,
 ]
 
+/**
+ * Run after SCHEMA, each one allowed to fail.
+ *
+ * `CREATE TABLE IF NOT EXISTS` does nothing to a table that already exists, so
+ * a column added later needs its own statement. SQLite has no
+ * `ADD COLUMN IF NOT EXISTS`, and the second run throwing "duplicate column" is
+ * the expected outcome rather than a problem.
+ */
+export const MIGRATIONS = [
+  `ALTER TABLE reveals ADD COLUMN admin_hash TEXT`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS reveals_by_admin ON reveals (admin_hash)`,
+]
+
 export const INSERT_REVEAL = `
-  INSERT INTO reveals (hash, gender, reveal_at, expires_at, config, created_at)
-  VALUES (?, ?, ?, ?, ?, ?)
+  INSERT INTO reveals (hash, admin_hash, gender, reveal_at, expires_at, config, created_at)
+  VALUES (?, ?, ?, ?, ?, ?, ?)
 `
 
-export const SELECT_REVEAL = `
-  SELECT hash, gender, reveal_at, expires_at, config FROM reveals WHERE hash = ?
+const REVEAL_FIELDS = `hash, admin_hash, gender, reveal_at, expires_at, config`
+
+export const SELECT_REVEAL = `SELECT ${REVEAL_FIELDS} FROM reveals WHERE hash = ?`
+
+export const SELECT_REVEAL_BY_ADMIN = `SELECT ${REVEAL_FIELDS} FROM reveals WHERE admin_hash = ?`
+
+// The gender is not in this statement on purpose: an organiser can rewrite
+// every word of their countdown, but not the answer people are voting on.
+export const UPDATE_REVEAL = `
+  UPDATE reveals SET reveal_at = ?, expires_at = ?, config = ? WHERE admin_hash = ?
 `
 
 export const UPSERT_VOTE = `

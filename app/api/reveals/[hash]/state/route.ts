@@ -40,8 +40,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ has
     body.tint = reveal.palette[reveal.gender].tint
     // Who guessed what, in the same withheld block as the answer itself: before
     // the hour it would say which way each guest leaned, and after it is just
-    // part of the fun.
-    body.voters = await store.voters(hash)
+    // part of the fun. Left out of the payload entirely when the organiser
+    // turned it off, rather than sent and hidden.
+    if (reveal.config.options.showVoters) {
+      body.voters = await store.voters(hash)
+    }
   }
 
   return NextResponse.json(body, { headers: { 'Cache-Control': 'no-store, max-age=0' } })

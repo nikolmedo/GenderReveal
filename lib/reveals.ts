@@ -20,20 +20,28 @@ export const RETENTION_DAYS = 30
 
 const DAY_MS = 86_400_000
 const HASH_LENGTH = 12
+const ADMIN_HASH_LENGTH = 20
 
 // No 0/1/l/o: these links get read aloud and retyped from phone screens.
 const HASH_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'
+
+export type RevealOptions = {
+  votingEnabled: boolean
+  showVoters: boolean
+}
 
 export type StoredConfig = {
   countdown: CountdownCopy
   reveal: RevealTexts
   colors: { girl: string; boy: string }
+  options: RevealOptions
   timeZone: string
   wallClock: string
 }
 
 export type LoadedReveal = {
   hash: string
+  adminHash: string | null
   gender: Gender
   revealAt: number
   expiresAt: number
@@ -52,16 +60,52 @@ export type CreateFailure =
   | 'collision'
 
 export type CreateResult =
-  | { ok: true; hash: string; revealAt: number; expiresAt: number }
+  | { ok: true; hash: string; adminHash: string; revealAt: number; expiresAt: number }
   | { ok: false; error: CreateFailure }
 
-export function newHash(): string {
-  const bytes = crypto.getRandomValues(new Uint8Array(HASH_LENGTH))
+export type UpdateFailure = CreateFailure | 'not_found' | 'already_revealed'
+
+export type UpdateResult = { ok: true; revealAt: number; expiresAt: number } | { ok: false; error: UpdateFailure }
+
+function randomHash(length: number): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(length))
   return Array.from(bytes, (b) => HASH_ALPHABET[b % HASH_ALPHABET.length]).join('')
+}
+
+export function newHash(): string {
+  return randomHash(HASH_LENGTH)
+}
+
+/** Longer than the public one: this link is the keys to the countdown. */
+export function newAdminHash(): string {
+  return randomHash(ADMIN_HASH_LENGTH)
 }
 
 export function isHash(value: unknown): value is string {
   return typeof value === 'string' && new RegExp(`^[${HASH_ALPHABET}]{${HASH_LENGTH}}$`).test(value)
+}
+
+export function isAdminHash(value: unknown): value is string {
+  return (
+    typeof value === 'string' &&
+    new RegExp(`^[${HASH_ALPHABET}]{${ADMIN_HASH_LENGTH}}$`).test(value)
+  )
+}
+
+/**
+ * Absent means on.
+ *
+ * Anything looser here would read every countdown made before these options
+ * existed as "voting disabled", which is the opposite of what its organiser
+ * chose. Only an explicit `false` turns something off.
+ */
+function cleanOptions(input: unknown): RevealOptions {
+  const source = (input ?? {}) as Record<string, unknown>
+
+  return {
+    votingEnabled: source.votingEnabled !== false,
+    showVoters: source.showVoters !== false,
+  }
 }
 
 /**
@@ -134,7 +178,14 @@ export function validate(body: unknown): { config: StoredConfig; gender: Gender;
   return {
     gender,
     revealAt,
-    config: { countdown, reveal, colors: { girl: girlColor, boy: boyColor }, timeZone, wallClock },
+    config: {
+      countdown,
+      reveal,
+      colors: { girl: girlColor, boy: boyColor },
+      options: cleanOptions(input.options),
+      timeZone,
+      wallClock,
+    },
   }
 }
 
@@ -152,31 +203,33 @@ export async function createReveal(body: unknown): Promise<CreateResult> {
   const serialised = JSON.stringify(parsed.config)
 
   for (let attempt = 0; attempt < 2; attempt++) {
+    // Both are unique keys, so both have to be redrawn on a retry.
     const hash = newHash()
+    const adminHash = newAdminHash()
     try {
       await store.createReveal({
         hash,
+        adminHash,
         gender: parsed.gender,
         revealAt: parsed.revealAt,
         expiresAt,
         config: serialised,
       })
-      return { ok: true, hash, revealAt: parsed.revealAt, expiresAt }
+      return { ok: true, hash, adminHash, revealAt: parsed.revealAt, expiresAt }
     } catch {
-      // Almost certainly a primary-key collision; one retry is plenty at
-      // 32^12 possible hashes.
+      // Almost certainly a key collision; one retry is plenty at 32^12
+      // possible public hashes and 32^20 admin ones.
     }
   }
 
   return { ok: false, error: 'collision' }
 }
 
-/** Returns null for a hash that never existed or has passed its retention window. */
-export async function loadReveal(hash: string, now = Date.now()): Promise<LoadedReveal | null> {
-  if (!isHash(hash)) return null
-
-  const store = await revealStore()
-  const row: RevealRow | null = await store.getReveal(hash)
+/**
+ * One place where a stored row becomes something the app can render, so the
+ * public lookup and the organiser's cannot drift on retention or on defaults.
+ */
+function hydrate(row: RevealRow | null, now: number): LoadedReveal | null {
   if (!row || row.expiresAt < now) return null
 
   const stored = JSON.parse(row.config) as StoredConfig
@@ -188,16 +241,63 @@ export async function loadReveal(hash: string, now = Date.now()): Promise<Loaded
     ...stored,
     countdown: { ...defaultConfig.countdown, ...stored.countdown },
     reveal: { ...defaultConfig.reveal, ...stored.reveal },
+    options: cleanOptions(stored.options),
   }
 
   return {
     hash: row.hash,
+    adminHash: row.adminHash,
     gender: row.gender,
     revealAt: row.revealAt,
     expiresAt: row.expiresAt,
     config,
     palette: derivePalette(config.colors.girl, config.colors.boy),
   }
+}
+
+/** Returns null for a hash that never existed or has passed its retention window. */
+export async function loadReveal(hash: string, now = Date.now()): Promise<LoadedReveal | null> {
+  if (!isHash(hash)) return null
+
+  const store = await revealStore()
+  return hydrate(await store.getReveal(hash), now)
+}
+
+/** The same, reached through the organiser's private token. */
+export async function loadRevealByAdmin(
+  adminHash: string,
+  now = Date.now(),
+): Promise<LoadedReveal | null> {
+  if (!isAdminHash(adminHash)) return null
+
+  const store = await revealStore()
+  return hydrate(await store.getRevealByAdmin(adminHash), now)
+}
+
+/**
+ * Rewrites a countdown through the organiser's link. Runs the very same
+ * validation as creation: a lighter path here would reopen the colour
+ * injection that the strict hex check closes.
+ */
+export async function updateReveal(adminHash: string, body: unknown): Promise<UpdateResult> {
+  if (!isAdminHash(adminHash)) return { ok: false, error: 'not_found' }
+
+  const now = Date.now()
+  const existing = await loadRevealByAdmin(adminHash, now)
+  if (!existing) return { ok: false, error: 'not_found' }
+
+  // Once the envelope is open there is nothing left to configure, and rewriting
+  // the copy would change what guests are looking at right now.
+  if (now >= existing.revealAt) return { ok: false, error: 'already_revealed' }
+
+  const parsed = validate({ ...(body as object), gender: existing.gender })
+  if (typeof parsed === 'string') return { ok: false, error: parsed }
+
+  const expiresAt = parsed.revealAt + RETENTION_DAYS * DAY_MS
+  const store = await revealStore()
+  await store.updateReveal(adminHash, parsed.revealAt, expiresAt, JSON.stringify(parsed.config))
+
+  return { ok: true, revealAt: parsed.revealAt, expiresAt }
 }
 
 /** Resolves the withheld copy for one gender. Only ever called after the hour. */

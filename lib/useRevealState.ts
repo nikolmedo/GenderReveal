@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Gender, RevealCopy } from '@/lib/messages'
-import type { Tally } from '@/lib/store/types'
+import type { Tally, Voters } from '@/lib/store/types'
 
 export type RevealState = {
   ready: boolean
@@ -14,6 +14,7 @@ export type RevealState = {
   correct: number
   copy: RevealCopy | null
   tint: [string, string, string] | null
+  voters: Voters | null
 }
 
 type Payload = {
@@ -25,6 +26,7 @@ type Payload = {
   correct?: number
   copy?: RevealCopy
   tint?: [string, string, string]
+  voters?: Voters
 }
 
 const IDLE_POLL_MS = 8_000
@@ -43,6 +45,7 @@ export function useRevealState(hash: string, revealAt: number, serverNow: number
     correct: 0,
     copy: null,
     tint: null,
+    voters: null,
   })
 
   /**
@@ -70,6 +73,7 @@ export function useRevealState(hash: string, revealAt: number, serverNow: number
         correct: data.correct ?? 0,
         copy: data.copy ?? null,
         tint: data.tint ?? null,
+        voters: data.voters ?? null,
       }))
     } catch {
       setState((previous) => ({ ...previous, ready: true, offline: true }))

@@ -2,6 +2,8 @@ import type { Gender } from '@/lib/messages'
 
 export type Tally = { girl: number; boy: number; total: number }
 
+export type Voters = { girl: string[]; boy: string[] }
+
 export type RevealRow = {
   hash: string
   gender: Gender
@@ -23,6 +25,8 @@ export type RevealStore = {
   purgeExpired(now: number): Promise<number>
 
   cast(hash: string, voterId: string, name: string, choice: Gender): Promise<void>
+  /** Who voted for what. Only ever read after a reveal has opened. */
+  voters(hash: string): Promise<Voters>
   tally(hash: string): Promise<Tally>
   countMatching(hash: string, gender: Gender): Promise<number>
 }
@@ -67,6 +71,12 @@ export const UPSERT_VOTE = `
 
 export const TALLY = `SELECT choice, COUNT(*) AS n FROM reveal_votes WHERE hash = ? GROUP BY choice`
 
+// Bounded so one enthusiastic guest list cannot turn the reveal payload into a
+// download. The counts stay authoritative; the page says how many it left out.
+export const VOTERS = `
+  SELECT choice, name FROM reveal_votes WHERE hash = ? ORDER BY created_at LIMIT 600
+`
+
 export const COUNT_MATCHING = `SELECT COUNT(*) AS n FROM reveal_votes WHERE hash = ? AND choice = ?`
 
 // SQLite has foreign keys off by default, so the votes are deleted by hand
@@ -77,6 +87,10 @@ export const PURGE_VOTES = `
 `
 
 export const PURGE_REVEALS = `DELETE FROM reveals WHERE expires_at < ?`
+
+export function emptyVoters(): Voters {
+  return { girl: [], boy: [] }
+}
 
 export function emptyTally(): Tally {
   return { girl: 0, boy: 0, total: 0 }

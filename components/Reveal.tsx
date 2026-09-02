@@ -3,16 +3,20 @@
 import { useEffect, useState } from 'react'
 import { fill, type Gender, type RevealCopy } from '@/lib/messages'
 import type { MyVote } from '@/lib/myVote'
+import type { Tally, Voters as VoterNames } from '@/lib/store/types'
+import { Voters } from '@/components/Voters'
 
 type Props = {
   copy: RevealCopy
   gender: Gender
-  total: number
+  counts: Tally
   correct: number
   myVote: MyVote | null
+  names: VoterNames | null
+  labels: { girl: string; boy: string }
 }
 
-export function Reveal({ copy, gender, total, correct, myVote }: Props) {
+export function Reveal({ copy, gender, counts, correct, myVote, names, labels }: Props) {
   // Staged entrance: the word lands first, the personal verdict a beat later.
   const [act, setAct] = useState(0)
   useEffect(() => {
@@ -39,8 +43,12 @@ export function Reveal({ copy, gender, total, correct, myVote }: Props) {
 
         <div className="verdict">
           <p className={`verdict__line${verdictTone}`}>{verdict}</p>
-          <p className="verdict__score">{fill(copy.score, { correct, total })}</p>
+          <p className="verdict__score">{fill(copy.score, { correct, total: counts.total })}</p>
         </div>
+
+        {names && (
+          <Voters copy={copy} names={names} counts={counts} labels={labels} winner={gender} />
+        )}
 
         <p className="reveal__host">{copy.hostLine}</p>
       </div>

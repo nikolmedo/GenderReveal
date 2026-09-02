@@ -60,6 +60,9 @@ const REVEAL_LABELS: Record<keyof RevealTexts, string> = {
   wrong: 'Si erró · usa {name}',
   noVote: 'Si no llegó a votar',
   score: 'Marcador · usa {correct} y {total}',
+  votersTitle: 'Título de la lista de votantes',
+  votersEmpty: 'Si no votó nadie',
+  votersMore: 'Si la lista se corta · usa {count}',
   hostLine: 'Firma del pie',
 }
 

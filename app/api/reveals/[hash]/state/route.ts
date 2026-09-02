@@ -38,6 +38,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ has
     body.correct = await store.countMatching(hash, reveal.gender)
     body.copy = revealCopy(reveal.config.reveal, reveal.gender)
     body.tint = reveal.palette[reveal.gender].tint
+    // Who guessed what, in the same withheld block as the answer itself: before
+    // the hour it would say which way each guest leaned, and after it is just
+    // part of the fun.
+    body.voters = await store.voters(hash)
   }
 
   return NextResponse.json(body, { headers: { 'Cache-Control': 'no-store, max-age=0' } })

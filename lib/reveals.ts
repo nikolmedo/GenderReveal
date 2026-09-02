@@ -201,6 +201,9 @@ export function revealCopy(texts: RevealTexts, gender: Gender): RevealCopy {
     wrong: texts.wrong,
     noVote: texts.noVote,
     score: texts.score,
+    votersTitle: texts.votersTitle,
+    votersEmpty: texts.votersEmpty,
+    votersMore: texts.votersMore,
     hostLine: texts.hostLine,
   }
 }

@@ -45,6 +45,10 @@
     "noVote": "Llegaste justo para la parte importante.",
     "score": "{correct} de {total} acertaron.",
 
+    "votersTitle": "Quién votó qué",
+    "votersEmpty": "Esta vez no votó nadie.",
+    "votersMore": "y {count} más",
+
     "hostLine": "Con amor, la familia"
   }
 }

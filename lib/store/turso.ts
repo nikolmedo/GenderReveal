@@ -3,6 +3,7 @@ import type { Gender } from '@/lib/messages'
 import {
   COUNT_MATCHING,
   emptyTally,
+  emptyVoters,
   INSERT_REVEAL,
   PURGE_REVEALS,
   PURGE_VOTES,
@@ -10,6 +11,7 @@ import {
   SELECT_REVEAL,
   TALLY,
   UPSERT_VOTE,
+  VOTERS,
   type RevealRow,
   type RevealStore,
 } from '@/lib/store/types'
@@ -82,6 +84,18 @@ export function tursoStore(url: string, authToken?: string): RevealStore {
       }
 
       return counts
+    },
+
+    async voters(hash) {
+      const db = await connect()
+      const result = await db.execute({ sql: VOTERS, args: [hash] })
+      const names = emptyVoters()
+
+      for (const row of result.rows) {
+        names[row.choice as Gender].push(String(row.name))
+      }
+
+      return names
     },
 
     async countMatching(hash, gender) {

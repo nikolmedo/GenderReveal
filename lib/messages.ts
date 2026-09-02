@@ -21,6 +21,9 @@ export type RevealCopy = {
   wrong: string
   noVote: string
   score: string
+  votersTitle: string
+  votersEmpty: string
+  votersMore: string
   hostLine: string
 }
 
@@ -72,5 +75,8 @@ export const REVEAL_LIMITS: Record<keyof RevealTexts, number> = {
   wrong: 140,
   noVote: 160,
   score: 120,
+  votersTitle: 60,
+  votersEmpty: 120,
+  votersMore: 40,
   hostLine: 90,
 }

@@ -3,6 +3,7 @@ import type { Gender } from '@/lib/messages'
 import {
   COUNT_MATCHING,
   emptyTally,
+  emptyVoters,
   INSERT_REVEAL,
   PURGE_REVEALS,
   PURGE_VOTES,
@@ -10,6 +11,7 @@ import {
   SELECT_REVEAL,
   TALLY,
   UPSERT_VOTE,
+  VOTERS,
   type RevealStore,
 } from '@/lib/store/types'
 
@@ -78,6 +80,17 @@ export function localFileStore(path = 'local.db'): RevealStore {
       }
 
       return counts
+    },
+
+    async voters(hash) {
+      const rows = open().prepare(VOTERS).all(hash) as Array<{ choice: Gender; name: string }>
+      const names = emptyVoters()
+
+      for (const row of rows) {
+        names[row.choice].push(String(row.name))
+      }
+
+      return names
     },
 
     async countMatching(hash, gender) {

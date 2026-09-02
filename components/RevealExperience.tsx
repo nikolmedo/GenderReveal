@@ -59,9 +59,11 @@ export function RevealExperience({ hash, revealAt, serverNow, copy, palette }: P
         <Reveal
           copy={state.copy!}
           gender={winner}
-          total={state.counts.total}
+          counts={state.counts}
           correct={state.correct}
           myVote={vote}
+          names={state.voters}
+          labels={{ girl: copy.girlLabel, boy: copy.boyLabel }}
         />
       ) : (
         <main className={`stage${closing ? ' stage--closing' : ''}`}>

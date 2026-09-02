@@ -11,23 +11,52 @@ type Zone = {
 }
 
 /**
- * CLDR canonicalisation drops the `Argentina/` segment from five of the twelve
- * Argentine zones, so `Intl.supportedValuesOf` lists Buenos Aires as
- * `America/Buenos_Aires` and typing "Argentina" never finds it. These keywords
- * put the lost information back. Both spellings remain valid for Intl, so only
- * the search needs the help, not the value.
+ * `Intl.supportedValuesOf` returns CLDR-canonical ids, and CLDR keeps a lot of
+ * cities filed under names nobody uses any more: Kolkata is Asia/Calcutta,
+ * Kyiv is Europe/Kiev, Ho Chi Minh is Asia/Saigon. It also drops the
+ * `Argentina/` segment from five of the twelve Argentine zones, so Buenos Aires
+ * is America/Buenos_Aires and typing "Argentina" finds the other seven only.
+ *
+ * Listed here as the names people would actually type. The mapping to whatever
+ * the browser files them under is resolved by the browser itself, so the day
+ * ICU promotes Europe/Kyiv this list keeps working unchanged.
  */
+const MODERN_NAMES = [
+  'America/Argentina/Buenos_Aires',
+  'America/Argentina/Catamarca',
+  'America/Argentina/Cordoba',
+  'America/Argentina/Jujuy',
+  'America/Argentina/Mendoza',
+  'America/Indiana/Indianapolis',
+  'America/Nuuk',
+  'Africa/Asmara',
+  'Asia/Ho_Chi_Minh',
+  'Asia/Kathmandu',
+  'Asia/Kolkata',
+  'Asia/Yangon',
+  'Atlantic/Faroe',
+  'Europe/Kyiv',
+]
+
+/** Nicknames and country names no identifier carries. */
 const EXTRA_KEYWORDS: Record<string, string> = {
-  'America/Buenos_Aires': 'argentina baires caba capital federal',
-  'America/Catamarca': 'argentina',
-  'America/Cordoba': 'argentina',
-  'America/Jujuy': 'argentina',
-  'America/Mendoza': 'argentina',
+  'America/Buenos_Aires': 'baires caba capital federal',
   'America/Sao_Paulo': 'brasil brazil',
   'America/Mexico_City': 'mexico df cdmx',
   'Europe/Madrid': 'espana spain',
   'America/New_York': 'usa eeuu nueva york',
   'America/Los_Angeles': 'usa eeuu california',
+  'Asia/Calcutta': 'india',
+  'Europe/Kiev': 'ucrania ukraine',
+}
+
+/** What the browser actually files a zone under, or null if it knows it not. */
+function canonicalId(id: string): string | null {
+  try {
+    return new Intl.DateTimeFormat('en', { timeZone: id }).resolvedOptions().timeZone
+  } catch {
+    return null
+  }
 }
 
 /** Offered first, because most of the people using this are in one of them. */
@@ -64,14 +93,21 @@ function regionOf(id: string): string {
   return parts.length > 1 ? parts[0].replace(/_/g, ' ') : ''
 }
 
-/** `GMT-3`, `GMT+5:30`, read from the zone itself so DST is already applied. */
+/**
+ * `GMT-03:00`, `GMT+05:45`, read from the zone itself so DST is already applied.
+ *
+ * Both sides of the subtraction have to be the same shape or the rounding lies.
+ * Formatting without seconds while comparing against an epoch that has them
+ * leaves the difference short by up to 59.999s, and rounding to minutes then
+ * moves a whole minute: -05:00 came out as -05:01 and +02:00 as +01:59.
+ */
 function offsetLabel(id: string, at: number): string {
   try {
     const parts = Object.fromEntries(
       new Intl.DateTimeFormat('en-US', {
         timeZone: id,
         year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
         hourCycle: 'h23',
       })
         .formatToParts(new Date(at))
@@ -80,14 +116,16 @@ function offsetLabel(id: string, at: number): string {
 
     const asUtc = Date.UTC(
       Number(parts.year), Number(parts.month) - 1, Number(parts.day),
-      Number(parts.hour), Number(parts.minute),
+      Number(parts.hour), Number(parts.minute), Number(parts.second),
     )
-    const minutes = Math.round((asUtc - at) / 60_000)
+    // The zone cannot report milliseconds, so drop them here too.
+    const minutes = Math.round((asUtc - Math.floor(at / 1000) * 1000) / 60_000)
+
     const sign = minutes < 0 ? '-' : '+'
     const abs = Math.abs(minutes)
-    const rest = abs % 60
+    const pad = (n: number) => String(n).padStart(2, '0')
 
-    return `GMT${sign}${Math.floor(abs / 60)}${rest ? `:${String(rest).padStart(2, '0')}` : ''}`
+    return `GMT${sign}${pad(Math.floor(abs / 60))}:${pad(abs % 60)}`
   } catch {
     return ''
   }
@@ -129,13 +167,32 @@ export function TimeZonePicker({
       if (extra && !ids.includes(extra)) ids = [extra, ...ids]
     }
 
+    // Give each zone the name it goes by today, on top of the one it is stored
+    // under. The city shown follows the modern spelling too, so the list says
+    // Kyiv and Kolkata rather than Kiev and Calcutta.
+    const modern = new Map<string, { city: string; words: string }>()
+    for (const name of MODERN_NAMES) {
+      const canonical = canonicalId(name)
+      if (!canonical) continue
+      const previous = modern.get(canonical)
+      modern.set(canonical, {
+        city: cityOf(name),
+        words: `${previous?.words ?? ''} ${name.replace(/[/_]/g, ' ')}`,
+      })
+    }
+
     setZones(
-      ids.map((id) => ({
-        id,
-        city: cityOf(id),
-        region: regionOf(id),
-        search: fold(`${id} ${cityOf(id)} ${regionOf(id)} ${EXTRA_KEYWORDS[id] ?? ''}`),
-      })),
+      ids.map((id) => {
+        const city = modern.get(id)?.city ?? cityOf(id)
+        return {
+          id,
+          city,
+          region: regionOf(id),
+          search: fold(
+            `${id} ${cityOf(id)} ${city} ${regionOf(id)} ${modern.get(id)?.words ?? ''} ${EXTRA_KEYWORDS[id] ?? ''}`,
+          ),
+        }
+      }),
     )
     // Only on mount: rebuilding this when `value` changes would be wasted work.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -221,7 +278,12 @@ export function TimeZonePicker({
     if (event.key === 'Tab' && open) setOpen(false)
   }
 
-  const current = value ? `${cityOf(value)}${now ? ` · ${offsetLabel(value, now)}` : ''}` : ''
+  // Read back from the list, so the closed field spells the city the same way
+  // the open list did.
+  const selected = zones.find((zone) => zone.id === value)
+  const current = value
+    ? `${selected?.city ?? cityOf(value)}${now ? ` · ${offsetLabel(value, now)}` : ''}`
+    : ''
 
   return (
     <div className="zone" ref={box}>

@@ -1770,3 +1770,13 @@ p {
     max-height: 8rem;
   }
 }
+
+/* The summary carries both labels and shows whichever matches the state. */
+.voters__verb--hide,
+.voters[open] .voters__verb--show {
+  display: none;
+}
+
+.voters[open] .voters__verb--hide {
+  display: inline;
+}

@@ -179,7 +179,16 @@ export async function loadReveal(hash: string, now = Date.now()): Promise<Loaded
   const row: RevealRow | null = await store.getReveal(hash)
   if (!row || row.expiresAt < now) return null
 
-  const config = JSON.parse(row.config) as StoredConfig
+  const stored = JSON.parse(row.config) as StoredConfig
+
+  // A countdown stored before a field existed simply has no value for it. Fill
+  // the gaps from the defaults rather than rendering a blank button at the one
+  // moment the whole thing is for.
+  const config: StoredConfig = {
+    ...stored,
+    countdown: { ...defaultConfig.countdown, ...stored.countdown },
+    reveal: { ...defaultConfig.reveal, ...stored.reveal },
+  }
 
   return {
     hash: row.hash,
@@ -201,7 +210,8 @@ export function revealCopy(texts: RevealTexts, gender: Gender): RevealCopy {
     wrong: texts.wrong,
     noVote: texts.noVote,
     score: texts.score,
-    votersTitle: texts.votersTitle,
+    votersShow: texts.votersShow,
+    votersHide: texts.votersHide,
     votersEmpty: texts.votersEmpty,
     votersMore: texts.votersMore,
     hostLine: texts.hostLine,

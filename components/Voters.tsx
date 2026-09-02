@@ -37,7 +37,12 @@ export function Voters({ copy, names, counts, labels, winner }: Props) {
 
   return (
     <details className="voters">
-      <summary className="voters__summary">{copy.votersTitle}</summary>
+      {/* Both labels ship; CSS swaps them on `open`, so the wording follows the
+          state without React needing to track it. */}
+      <summary className="voters__summary">
+        <span className="voters__verb voters__verb--show">{copy.votersShow}</span>
+        <span className="voters__verb voters__verb--hide">{copy.votersHide}</span>
+      </summary>
 
       <div className="voters__columns">
         {sides.map(({ side, label, count, listed }) => (

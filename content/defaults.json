@@ -45,7 +45,8 @@
     "noVote": "Llegaste justo para la parte importante.",
     "score": "{correct} de {total} acertaron.",
 
-    "votersTitle": "Quién votó qué",
+    "votersShow": "Ver la votación",
+    "votersHide": "Ocultar la votación",
     "votersEmpty": "Esta vez no votó nadie.",
     "votersMore": "y {count} más",
 
